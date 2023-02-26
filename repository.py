@@ -22,7 +22,7 @@ query_for_model = {
 class Repository:
     def __init__(self) -> None:
         # XxxRepository => Repository
-        self._class_declaration = self.__class__.__name__[:self.__class__.__name__.rfind("Repository")]
+        self._class_name = self.__class__.__name__[:self.__class__.__name__.rfind("Repository")]
 
     def execute_query(self, query):
             # Idea: Make guestbook the app's name somehow so it can be accessed globally?
@@ -60,11 +60,11 @@ class Repository:
          return self.execute_query(self.prepare_query(obj_variable_values, query_for_model[(type(obj), "save")]))
     
     def fetch_all(self):
-        return self.execute_query(self.prepare_query_2(self._class_declaration, FETCH_ALL_QUERY))
+        return self.execute_query(self.prepare_query_2(self._class_name, FETCH_ALL_QUERY))
     
     def search_by_id(self, id):
         obj_to_find = None
-        for obj in self.fetch_all(self._class_declaration):
+        for obj in self.fetch_all(self._class_name):
             if obj.id == id:
                 obj_to_find = obj
                 break
@@ -72,7 +72,7 @@ class Repository:
         return obj_to_find
     
     def search_by_attributes(self, attributes):
-        for obj in self.fetch_all(self._class_declaration):
+        for obj in self.fetch_all(self._class_name):
             for property, value in attributes.items():
                 if not getattr(obj, property) == value:
                     found = False
