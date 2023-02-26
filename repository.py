@@ -4,6 +4,8 @@ import sqlite3
 """
     Design proposal:
 Map (object, operation) pair to a specific query to be run.
+Repository name will be <model_class_name>Repository so the model name
+can be extracted.
 
     Ideas for future improvement:
 1. Have query_for_model be automatically created given the list of models
@@ -18,8 +20,9 @@ query_for_model = {
 }
 
 class Repository:
-    def __init__(self, class_declaration) -> None:
-        self._class_declaration = None
+    def __init__(self) -> None:
+        # XxxRepository => Repository
+        self._class_declaration = self.__class__.__name__[:self.__class__.__name__.rfind("Repository")]
 
     def execute_query(self, query):
             # Idea: Make guestbook the app's name somehow so it can be accessed globally?
@@ -86,12 +89,7 @@ class Repository:
         # TODO remove update, handle it in save
         pass
 
-"""
-    Convention:
-Repository name will be <model_class_name>Repository so we can get class declaration
-"""
+
 
 class GuestBookRepository(Repository):
-    def __init__(self) -> None:
-        # GuestBookRepository => Guestbook
-        self._class_declaration = self.__class__.__name__[:self.__class__.__name__.rfind("Repository")]
+    pass
