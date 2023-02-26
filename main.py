@@ -3,6 +3,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from views import path_view, route
 import views
 
+from models import GuestBook
+from repository import GuestBookRepository
+
 class Server(BaseHTTPRequestHandler):
     def do_POST(self):
         from urllib import parse
@@ -12,13 +15,14 @@ class Server(BaseHTTPRequestHandler):
         username = fields["username"][0]
         comment = fields["comment"][0]
 
-        import sqlite3
-        conn = sqlite3.connect('guestbook.db')
-        conn.execute("INSERT INTO GuestBook (username,comment,posted_on) \
-            VALUES (?, ?, DATE())",(username, comment));
-        # It is necessary commit, otherwise changes will not be saved upon calling close()
-        conn.commit()
-        conn.close()
+        from datetime import datetime
+        gbrepo = GuestBookRepository()
+        gbentry = GuestBook()
+        gbentry.username = username
+        gbentry.comment = comment
+        gbentry.posted_on = datetime.now().strftime("%B %d, %Y %I:%M%p")
+        print(gbrepo.save(gbentry))
+        print(gbrepo.fetch_all())
 
         view = path_view[self.path]
         self.send_response(view.status_code)
