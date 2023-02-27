@@ -72,15 +72,20 @@ class Repository:
         return obj_to_find
     
     def search_by_attributes(self, attributes):
+        items = []
+
+        # TODO could we replace this with a SELECT * FROM WHERE ...?
         for obj in self.fetch_all(self._class_name):
+            found = True
             for property, value in attributes.items():
                 if not getattr(obj, property) == value:
                     found = False
             
             if found:
-                return obj
+                # TODO we still have to convert obj to a class instance
+                items += obj
             
-        return None
+        return items
 
     def delete(self):
         pass
