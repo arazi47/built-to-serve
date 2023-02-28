@@ -6,4 +6,4 @@ class GuestBook:
         self.posted_on = None
 
     def __str__(self) -> str:
-        return "id=" + str(self.id) + "; username=" + self.username + "; comment=" + self.comment + "; posted_on=" + str(self.posted_on)
+        return "id=" + str(self.id) + "; username=" + str(self.username) + "; comment=" + str(self.comment) + "; posted_on=" + str(self.posted_on)

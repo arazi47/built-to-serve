@@ -16,6 +16,7 @@ FETCH_ALL_QUERY = "SELECT * FROM ?"
 query_for_model = {
     (GuestBook, "save"): "INSERT INTO GuestBook (?, ?, ?) VALUES (?, ?, ?)",
 #    (GuestBook, "search_by_id"): "SELECT * FROM GuestBook WHERE id = ?",
+    (GuestBook, "fetch_all"): "SELECT ?, ?, ?, ? FROM GuestBook",
     (GuestBook, "delete_by_id"): "DELETE FROM GuestBook WHERE id = ?",
 }
 
@@ -25,6 +26,7 @@ class Repository:
         self._class_name = self.__class__.__name__[:self.__class__.__name__.rfind("Repository")]
 
     def execute_query(self, query):
+            print(query)
             # Idea: Make guestbook the app's name somehow so it can be accessed globally?
             self.connection = sqlite3.connect("guestbook.db")
             cursor = self.connection.execute(query)
@@ -55,12 +57,33 @@ class Repository:
         query = query.replace("?", class_name, 1)
         return query
     
+    def prepare_fetch_all_query(self, instance_variables, query):
+        for property_name, _ in instance_variables:
+            query = query.replace("?", property_name, 1)
+
+        return query
+            
+    
     def save(self, obj):
          obj_variable_values = self.get_object_variable_values_from_object(obj)
          return self.execute_query(self.prepare_query(obj_variable_values, query_for_model[(type(obj), "save")]))
     
     def fetch_all(self):
-        return self.execute_query(self.prepare_query_2(self._class_name, FETCH_ALL_QUERY))
+        # Maybe move this so that repo always has access to _class?
+        import importlib
+        _class = getattr(importlib.import_module("models"), self._class_name)
+        instance_variables = self.get_object_variable_values_from_object(_class())
+        instance_variables.append(("id", None))
+        print(instance_variables)
+
+        items = []
+        for row in self.execute_query(self.prepare_fetch_all_query(instance_variables, query_for_model[(GuestBook, "fetch_all")])):
+            item = _class()
+            for i in range(len(instance_variables)):
+                setattr(item, instance_variables[i][0], row[i])
+            items.append(item)
+        
+        return items
     
     def search_by_id(self, id):
         obj_to_find = None
@@ -73,17 +96,14 @@ class Repository:
     
     def search_by_attributes(self, attributes):
         items = []
-
-        # TODO could we replace this with a SELECT * FROM WHERE ...?
-        for obj in self.fetch_all(self._class_name):
+        for obj in self.fetch_all():
             found = True
             for property, value in attributes.items():
                 if not getattr(obj, property) == value:
                     found = False
             
             if found:
-                # TODO we still have to convert obj to a class instance
-                items += obj
+                items.append(obj)
             
         return items
 
