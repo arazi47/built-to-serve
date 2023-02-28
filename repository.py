@@ -14,10 +14,10 @@ can be extracted.
 FETCH_ALL_QUERY = "SELECT * FROM ?"
 
 query_for_model = {
-    (GuestBook, "save"): "INSERT INTO GuestBook (?, ?, ?) VALUES (?, ?, ?)",
+    "save": "INSERT INTO <modelname> (?, ?, ?) VALUES (?, ?, ?)",
 #    (GuestBook, "search_by_id"): "SELECT * FROM GuestBook WHERE id = ?",
-    (GuestBook, "fetch_all"): "SELECT ?, ?, ?, ? FROM GuestBook",
-    (GuestBook, "delete_by_id"): "DELETE FROM GuestBook WHERE id = ?",
+    "fetch_all": "SELECT ?, ?, ?, ? FROM <modelname>",
+    "delete_by_id": "DELETE FROM <modelname> WHERE id = ?",
 }
 
 class Repository:
@@ -39,6 +39,8 @@ class Repository:
         return [(attr, getattr(obj, attr)) for attr in dir(obj) if not callable(getattr(obj, attr)) and not attr.startswith("__") and not attr == "id"]
     
     def prepare_query(self, instance_variables, query):
+         query = query.replace("<modelname>", self._class_name)
+
          # Replace ?s in a query with actual attributes/values
          # TODO get rid of these two loops, this should be done in only one
          for attr, _ in instance_variables:
@@ -58,6 +60,7 @@ class Repository:
         return query
     
     def prepare_fetch_all_query(self, instance_variables, query):
+        query = query.replace("<modelname>", self._class_name)
         for property_name, _ in instance_variables:
             query = query.replace("?", property_name, 1)
 
@@ -66,7 +69,7 @@ class Repository:
     
     def save(self, obj):
          obj_variable_values = self.get_object_variable_values_from_object(obj)
-         return self.execute_query(self.prepare_query(obj_variable_values, query_for_model[(type(obj), "save")]))
+         return self.execute_query(self.prepare_query(obj_variable_values, query_for_model["save"]))
     
     def fetch_all(self):
         # Maybe move this so that repo always has access to _class?
@@ -77,7 +80,7 @@ class Repository:
         print(instance_variables)
 
         items = []
-        for row in self.execute_query(self.prepare_fetch_all_query(instance_variables, query_for_model[(GuestBook, "fetch_all")])):
+        for row in self.execute_query(self.prepare_fetch_all_query(instance_variables, query_for_model["fetch_all"])):
             item = _class()
             for i in range(len(instance_variables)):
                 setattr(item, instance_variables[i][0], row[i])
