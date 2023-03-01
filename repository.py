@@ -49,8 +49,6 @@ class Repository:
 
         print(query)
 
-        # Replace ?s in a query with actual attributes/values
-        # TODO get rid of these two loops, this should be done in only one
         for attr, value in instance_variables:
             print(attr, value)
             if "<attribute>" in query:
