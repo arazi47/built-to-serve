@@ -7,9 +7,6 @@ import sqlite3
 Map (object, operation) pair to a specific query to be run.
 Repository name will be <model_class_name>Repository so the model name
 can be extracted.
-
-    Ideas for future improvement:
-1. Have query_for_model be automatically created given the list of models
 """
 
 query_for_model = {
@@ -39,7 +36,7 @@ class Repository:
 
     def get_object_variable_values_from_object(self, obj):
         return [(attr, getattr(obj, attr)) for attr in dir(obj) if not callable(getattr(obj, attr)) and not attr.startswith("__") and not attr == "id"]
-    
+
     def prepare_query(self, obj, instance_variables, query):
         query = query.replace("<modelname>", self._class_name)
         query = query.replace("<id>", str(obj.id))
@@ -54,8 +51,6 @@ class Repository:
                 query = query.replace("<value>", value, 1)
 
         return query
-        
-            
     
     def save(self, obj):
         if self.search_by_id(obj.id):
@@ -104,7 +99,6 @@ class Repository:
 
     def delete(self):
         pass
-
 
 
 class GuestBookRepository(Repository):
