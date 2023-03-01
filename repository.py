@@ -15,7 +15,8 @@ FETCH_ALL_QUERY = "SELECT * FROM ?"
 
 query_for_model = {
     "save": "INSERT INTO <modelname> (?, ?, ?) VALUES (?, ?, ?)",
-#    (GuestBook, "search_by_id"): "SELECT * FROM GuestBook WHERE id = ?",
+    "update": "UPDATE <modelname> SET <attribute> = <value>, <attribute> = <value>, <attribute> = <value> WHERE id = <id>",
+    # Select columns instead of * because we don't know the order in which they will be returned
     "fetch_all": "SELECT ?, ?, ?, ? FROM <modelname>",
     "delete_by_id": "DELETE FROM <modelname> WHERE id = ?",
 }
@@ -65,11 +66,32 @@ class Repository:
             query = query.replace("?", property_name, 1)
 
         return query
+    
+    def prepare_update_query(self, obj, instance_variables, query):
+        query = query.replace("<modelname>", self._class_name)
+        query = query.replace("<id>", str(obj.id))
+
+        # Replace ?s in a query with actual attributes/values
+        # TODO get rid of these two loops, this should be done in only one
+        for attr, value in instance_variables:
+            query = query.replace("<attribute>", attr, 1)
+            if isinstance(value, str):
+                value = "'" + value + "'"
+            query = query.replace("<value>", value, 1)
+
+        return query
+        
             
     
     def save(self, obj):
-         obj_variable_values = self.get_object_variable_values_from_object(obj)
-         return self.execute_query(self.prepare_query(obj_variable_values, query_for_model["save"]))
+        if self.search_by_id(obj.id):
+            # Update
+            obj_variable_values = self.get_object_variable_values_from_object(obj)
+            return self.execute_query(self.prepare_update_query(obj, obj_variable_values, query_for_model["update"]))
+        else:
+            # Add
+            obj_variable_values = self.get_object_variable_values_from_object(obj)
+            return self.execute_query(self.prepare_query(obj_variable_values, query_for_model["save"]))
     
     def fetch_all(self):
         # Maybe move this so that repo always has access to _class?
@@ -77,7 +99,6 @@ class Repository:
         _class = getattr(importlib.import_module("models"), self._class_name)
         instance_variables = self.get_object_variable_values_from_object(_class())
         instance_variables.append(("id", None))
-        print(instance_variables)
 
         items = []
         for row in self.execute_query(self.prepare_fetch_all_query(instance_variables, query_for_model["fetch_all"])):
@@ -90,7 +111,7 @@ class Repository:
     
     def search_by_id(self, id):
         obj_to_find = None
-        for obj in self.fetch_all(self._class_name):
+        for obj in self.fetch_all():
             if obj.id == id:
                 obj_to_find = obj
                 break
@@ -111,10 +132,6 @@ class Repository:
         return items
 
     def delete(self):
-        pass
-
-    def update(self):
-        # TODO remove update, handle it in save
         pass
 
 
