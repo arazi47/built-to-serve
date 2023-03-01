@@ -31,7 +31,6 @@ class Repository:
         self._class = getattr(importlib.import_module("models"), self._class_name)
 
     def execute_query(self, query):
-            print(query)
             # Idea: Make guestbook the app's name somehow so it can be accessed globally?
             self.connection = sqlite3.connect("guestbook.db")
             cursor = self.connection.execute(query)
@@ -47,10 +46,7 @@ class Repository:
         query = query.replace("<modelname>", self._class_name)
         query = query.replace("<id>", str(obj.id))
 
-        print(query)
-
         for attr, value in instance_variables:
-            print(attr, value)
             if "<attribute>" in query:
                 query = query.replace("<attribute>", attr, 1)
             
