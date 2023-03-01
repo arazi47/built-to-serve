@@ -12,8 +12,6 @@ can be extracted.
 1. Have query_for_model be automatically created given the list of models
 """
 
-FETCH_ALL_QUERY = "SELECT * FROM ?"
-
 query_for_model = {
     "save": "INSERT INTO <modelname> (<attribute>, <attribute>, <attribute>) VALUES (<value>, <value>, <value>)",
     "update": "UPDATE <modelname> SET <attribute> = <value>, <attribute> = <value>, <attribute> = <value> WHERE id = <id>",
