@@ -1,4 +1,5 @@
 from models import GuestBook
+import importlib
 import sqlite3
 
 """
@@ -14,17 +15,20 @@ can be extracted.
 FETCH_ALL_QUERY = "SELECT * FROM ?"
 
 query_for_model = {
-    "save": "INSERT INTO <modelname> (?, ?, ?) VALUES (?, ?, ?)",
+    "save": "INSERT INTO <modelname> (<attribute>, <attribute>, <attribute>) VALUES (<value>, <value>, <value>)",
     "update": "UPDATE <modelname> SET <attribute> = <value>, <attribute> = <value>, <attribute> = <value> WHERE id = <id>",
     # Select columns instead of * because we don't know the order in which they will be returned
-    "fetch_all": "SELECT ?, ?, ?, ? FROM <modelname>",
-    "delete_by_id": "DELETE FROM <modelname> WHERE id = ?",
+    "fetch_all": "SELECT <attribute>, <attribute>, <attribute>, <attribute> FROM <modelname>",
+    "delete_by_id": "DELETE FROM <modelname> WHERE id = <id>",
 }
 
 class Repository:
     def __init__(self) -> None:
         # XxxRepository => Repository
         self._class_name = self.__class__.__name__[:self.__class__.__name__.rfind("Repository")]
+
+        # The model class can be instantiated if needed (obj = self._class()) 
+        self._class = getattr(importlib.import_module("models"), self._class_name)
 
     def execute_query(self, query):
             print(query)
@@ -39,45 +43,23 @@ class Repository:
     def get_object_variable_values_from_object(self, obj):
         return [(attr, getattr(obj, attr)) for attr in dir(obj) if not callable(getattr(obj, attr)) and not attr.startswith("__") and not attr == "id"]
     
-    def prepare_query(self, instance_variables, query):
-         query = query.replace("<modelname>", self._class_name)
-
-         # Replace ?s in a query with actual attributes/values
-         # TODO get rid of these two loops, this should be done in only one
-         for attr, _ in instance_variables:
-              query = query.replace("?", attr, 1)
-        
-         for _, value in instance_variables:
-            if isinstance(value, str):
-                value = "'" + value + "'"
-
-            query = query.replace("?", value, 1)
-
-         return query
-    
-    # can we overload prepare_query by explicitly setting expected types for parameters?
-    def prepare_query_2(self, class_name, query):
-        query = query.replace("?", class_name, 1)
-        return query
-    
-    def prepare_fetch_all_query(self, instance_variables, query):
-        query = query.replace("<modelname>", self._class_name)
-        for property_name, _ in instance_variables:
-            query = query.replace("?", property_name, 1)
-
-        return query
-    
-    def prepare_update_query(self, obj, instance_variables, query):
+    def prepare_query(self, obj, instance_variables, query):
         query = query.replace("<modelname>", self._class_name)
         query = query.replace("<id>", str(obj.id))
+
+        print(query)
 
         # Replace ?s in a query with actual attributes/values
         # TODO get rid of these two loops, this should be done in only one
         for attr, value in instance_variables:
-            query = query.replace("<attribute>", attr, 1)
-            if isinstance(value, str):
-                value = "'" + value + "'"
-            query = query.replace("<value>", value, 1)
+            print(attr, value)
+            if "<attribute>" in query:
+                query = query.replace("<attribute>", attr, 1)
+            
+            if "<value>" in query:
+                if isinstance(value, str):
+                    value = "'" + value + "'"
+                query = query.replace("<value>", value, 1)
 
         return query
         
@@ -87,22 +69,19 @@ class Repository:
         if self.search_by_id(obj.id):
             # Update
             obj_variable_values = self.get_object_variable_values_from_object(obj)
-            return self.execute_query(self.prepare_update_query(obj, obj_variable_values, query_for_model["update"]))
+            return self.execute_query(self.prepare_query(obj, obj_variable_values, query_for_model["update"]))
         else:
             # Add
             obj_variable_values = self.get_object_variable_values_from_object(obj)
-            return self.execute_query(self.prepare_query(obj_variable_values, query_for_model["save"]))
+            return self.execute_query(self.prepare_query(obj, obj_variable_values, query_for_model["save"]))
     
     def fetch_all(self):
-        # Maybe move this so that repo always has access to _class?
-        import importlib
-        _class = getattr(importlib.import_module("models"), self._class_name)
-        instance_variables = self.get_object_variable_values_from_object(_class())
+        instance_variables = self.get_object_variable_values_from_object(self._class())
         instance_variables.append(("id", None))
 
         items = []
-        for row in self.execute_query(self.prepare_fetch_all_query(instance_variables, query_for_model["fetch_all"])):
-            item = _class()
+        for row in self.execute_query(self.prepare_query(self._class(), instance_variables, query_for_model["fetch_all"])):
+            item = self._class()
             for i in range(len(instance_variables)):
                 setattr(item, instance_variables[i][0], row[i])
             items.append(item)
