@@ -5,13 +5,17 @@ def route(path):
         # Route path to an instance of the class
         # [1:] - without leading '/'
         file_path = path[1:]
-        if file_path in ["", "index.html"]:
+        file_path = "content/" + file_path
+        if file_path == "content/":
             file_path = "content/index.html"
 
         path_view[path] = view_class(file_path)
         print(path, path_view[path].file_path, path_view[path].status_code, path_view[path].headers)
         return view_class
     return wrapper
+
+def render(page):
+    return path_view[page].build_GET_response()
 
 
 class BaseView:
@@ -21,9 +25,12 @@ class BaseView:
         self.headers = {
             "Content-type": content_type,
         }
-    
-    def build_response(self):
-        pass
+
+    def build_GET_response(self) -> str:
+        return "Not implemented"
+
+    def build_POST_response(self) -> str:
+        return "Not implemented"
 
     def __str__(self) -> str:
         return "File path: " + self.file_path + "; status=" + str(self.status_code) + "; headers=" + str(self.headers)
@@ -33,7 +40,7 @@ class CSS(BaseView):
     def __init__(self, file_path, status_code=200, content_type="text/css") -> None:
         super().__init__(file_path, status_code, content_type)
 
-    def build_response(self) -> str:
+    def build_GET_response(self) -> str:
         with open(self.file_path) as f:
             return f.read()
 
@@ -42,7 +49,7 @@ class JavaScript(BaseView):
     def __init__(self, file_path="", status_code=200, content_type="text/javascript") -> None:
         super().__init__(file_path, status_code, content_type)
         
-    def build_response(self) -> str:
+    def build_GET_response(self) -> str:
         with open(self.file_path) as f:
             return f.read()
 
@@ -51,7 +58,7 @@ class PHP(BaseView):
     def __init__(self, file_path="", status_code=200, content_type="text/html") -> None:
         super().__init__(file_path, status_code, content_type)
 
-    def build_response(self) -> str:
+    def build_GET_response(self) -> str:
         with open(self.file_path) as f:
             return f.read()
 
@@ -60,7 +67,7 @@ class Image(BaseView):
     def __init__(self, file_path, status_code=200, content_type="image/jpeg") -> None:
         super().__init__(file_path, status_code, content_type)
 
-    def build_response(self) -> str:
+    def build_GET_response(self) -> str:
         with open(self.file_path, "rb") as f:
             return f.read()
 
@@ -77,8 +84,8 @@ def prepare_special_routes():
         file_path = file_path.lower()
         file_path = file_path.replace("\\", "/")
 
-        if os.path.isfile(file_path) and not file_path.endswith(".html"):
-            request_path = file_path[file_path.find("/", 2):]
+        request_path = file_path[file_path.find("/", 2):]
+        if os.path.isfile(file_path) and not file_path.endswith(".html") and not request_path in path_view:
             if file_path.endswith(".css"):
                 path_view[request_path] = CSS(file_path, status_code=200)
             elif any(file_path.endswith(ext) for ext in image_extensions):
@@ -113,6 +120,33 @@ class Index(BaseView):
     def __init__(self, file_path, status_code=200, content_type="text/html") -> None:
         super().__init__(file_path, status_code, content_type)
 
-    def build_response(self) -> str:
+    def build_GET_response(self) -> str:
         with open(self.file_path) as f:
             return f.read()
+
+@route("/guesthome.php")
+class GuestHome(BaseView):
+    def __init__(self, file_path="", status_code=200, content_type="text/html") -> None:
+        super().__init__(file_path, status_code, content_type)
+
+    def build_GET_response(self) -> str:
+        with open(self.file_path) as f:
+            return f.read()
+
+    def build_POST_response(self, fields) -> str:
+        username = fields["username"][0]
+        comment = fields["comment"][0]
+
+        from datetime import datetime
+        from repository import GuestBookRepository
+        from models import GuestBook
+        gbrepo = GuestBookRepository()
+        gbentry = GuestBook()
+        gbentry.username = username
+        gbentry.comment = comment
+        gbentry.posted_on = datetime.now().strftime("%B %d, %Y %I:%M%p")
+        print(gbrepo.save(gbentry))
+        for gbentry in gbrepo.fetch_all():
+            print(gbentry)
+
+        return render("/")
