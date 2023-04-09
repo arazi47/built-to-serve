@@ -97,8 +97,14 @@ class Repository:
             
         return items
 
-    def delete(self):
-        pass
+    def delete(self, id):
+        if not self.search_by_id(id):
+            return False
+        else:
+            return self.execute_query(self.prepare_query(self._class(id), {}, query_for_model["delete_by_id"]))
+
+    def __iter__(self):
+        return iter(self.fetch_all())
 
 
 class GuestBookRepository(Repository):

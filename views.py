@@ -1,3 +1,8 @@
+from custom_content_parser import transform_template_to_code
+from datetime import datetime
+from repository import GuestBookRepository
+from models import GuestBook
+
 path_view = {}
 
 def route(path):
@@ -124,29 +129,45 @@ class Index(BaseView):
         with open(self.file_path) as f:
             return f.read()
 
-@route("/guesthome.php")
+@route("/guesthome.html")
 class GuestHome(BaseView):
     def __init__(self, file_path="", status_code=200, content_type="text/html") -> None:
         super().__init__(file_path, status_code, content_type)
 
     def build_GET_response(self) -> str:
-        with open(self.file_path) as f:
-            return f.read()
+        return transform_template_to_code(self.file_path, {"gbrepo": GuestBookRepository()})
 
     def build_POST_response(self, fields) -> str:
         username = fields["username"][0]
         comment = fields["comment"][0]
 
-        from datetime import datetime
-        from repository import GuestBookRepository
-        from models import GuestBook
         gbrepo = GuestBookRepository()
         gbentry = GuestBook()
         gbentry.username = username
         gbentry.comment = comment
         gbentry.posted_on = datetime.now().strftime("%B %d, %Y %I:%M%p")
-        print(gbrepo.save(gbentry))
-        for gbentry in gbrepo.fetch_all():
-            print(gbentry)
 
         return render("/")
+
+
+@route("/adminhome.html")
+class AdminHome(BaseView):
+    def __init__(self, file_path="", status_code=200, content_type="text/html") -> None:
+        super().__init__(file_path, status_code, content_type)
+
+    def build_GET_response(self) -> str:
+        return transform_template_to_code(self.file_path, {"gbrepo": GuestBookRepository()})
+    
+    def build_POST_response(self, fields) -> str:
+        id = int(fields["id"][0])
+        gbrepo = GuestBookRepository()
+        if "submit_update_entry" in fields:
+            username = fields["username"][0]
+            comment = fields["comment"][0]
+            gbrepo.save(GuestBook(id, username, comment, datetime.now().strftime("%B %d, %Y %I:%M%p")))
+        elif "submit_delete_entry" in fields:
+            gbrepo.delete(id)
+        else:
+            print("Unknown POST request.")
+
+        return render("/adminhome.html")

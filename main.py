@@ -4,15 +4,12 @@ from urllib import parse
 from views import path_view, route
 import views
 
-from models import GuestBook
-from repository import GuestBookRepository
-
 class Server(BaseHTTPRequestHandler):
     def do_POST(self):
         view = path_view[self.path]
         length = int(self.headers.get('content-length'))
         field_data = self.rfile.read(length)
-        fields = parse.parse_qs(str(field_data,"UTF-8"))
+        fields = parse.parse_qs(str(field_data,"UTF-8"), keep_blank_values=True)
         response = view.build_POST_response(fields)
 
         self.send_response(view.status_code)
