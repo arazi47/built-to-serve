@@ -69,7 +69,6 @@ def transform_custom_content_to_html(lines, variables):
 
             # Hopefully variables[list_var] is already something
             # like a list, which we can iterate over
-            #print("LISTVAR", list_var)
             # list var can be of type list or an iterable class or...
             # the next line assumes list_var is "repo.fetch_all()"
             iterable = variables[list_var.split(".")[0]]

@@ -105,7 +105,3 @@ class Repository:
 
     def __iter__(self):
         return iter(self.fetch_all())
-
-
-class GuestBookRepository(Repository):
-    pass

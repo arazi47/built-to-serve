@@ -39,7 +39,7 @@ class Server(BaseHTTPRequestHandler):
             self.send_response(view.status_code)
             self.end_headers()
 
-def main():
+def run():
     views.prepare_special_routes()
 
     server = HTTPServer(("127.0.0.1", 8000), Server)
@@ -50,4 +50,4 @@ def main():
         print(e)
 
 if __name__ == "__main__":
-    main()
+    run()
