@@ -1,8 +1,3 @@
-from custom_content_parser import transform_template_to_code
-from datetime import datetime
-from repository import GuestBookRepository
-from models import GuestBook
-
 path_view = {}
 
 def route(path):
@@ -15,7 +10,7 @@ def route(path):
             file_path = "content/index.html"
 
         path_view[path] = view_class(file_path)
-        print(path, path_view[path].file_path, path_view[path].status_code, path_view[path].headers)
+        #print(path, path_view[path].file_path, path_view[path].status_code, path_view[path].headers)
         return view_class
     return wrapper
 
@@ -108,11 +103,5 @@ def prepare_special_routes():
             else:
                 print("Unhandled special route:", file_path)
 
-    for k, v in path_view.items():
-        print(k, v)
-    return
-
-    import os
-    for file in os.listdir('content'):
-        if file.endswith(".css"):
-            path_view["/" + file] = CSS()
+    # for k, v in path_view.items():
+    #     print(k, v)

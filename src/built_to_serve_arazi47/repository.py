@@ -1,4 +1,3 @@
-from models import GuestBook
 import importlib
 import sqlite3
 

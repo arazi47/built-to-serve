@@ -1,8 +1,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from urllib import parse
-from views import path_view, route
-import views
+from .views import path_view, prepare_special_routes, BaseView
 
 class Server(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -34,13 +33,13 @@ class Server(BaseHTTPRequestHandler):
                 self.wfile.write(bytes(response, "utf-8"))
         except Exception as e:
             print(e)
-            print("We got here", self.path)
-            view = views.BaseView()
+            #print("We got here", self.path)
+            view = BaseView()
             self.send_response(view.status_code)
             self.end_headers()
 
 def run():
-    views.prepare_special_routes()
+    prepare_special_routes()
 
     server = HTTPServer(("127.0.0.1", 8000), Server)
 

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "built_to_serve_arazi47"
+version = "0.0.3"
+authors = [
+  { name="Alexis Razi", email="razialexis43@gmail.com" },
+]
+description = "Easy to use web server"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/arazi47/built-to-serve"
+"Bug Tracker" = "https://github.com/arazi47/built-to-serve/issues"
