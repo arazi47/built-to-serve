@@ -1,6 +1,9 @@
 path_view = {}
 
-def route(path):
+def route(identifier, path=None):
+    if not path:
+        path = identifier
+
     def wrapper(view_class):
         # Route path to an instance of the class
         # [1:] - without leading '/'
@@ -9,8 +12,7 @@ def route(path):
         if file_path == "content/":
             file_path = "content/index.html"
 
-        path_view[path] = view_class(file_path)
-        #print(path, path_view[path].file_path, path_view[path].status_code, path_view[path].headers)
+        path_view[identifier] = view_class(file_path)
         return view_class
     return wrapper
 
