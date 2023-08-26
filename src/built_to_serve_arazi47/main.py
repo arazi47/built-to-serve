@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import sys
 from urllib import parse
 from .views import path_view, prepare_special_routes, BaseView
 
@@ -39,9 +40,17 @@ class Server(BaseHTTPRequestHandler):
             self.end_headers()
 
 def run():
+    if len(sys.argv) < 3:
+        print("[WARNING] Missing one or more arguments. Using default values server_address=\"0.0.0.0\", server_port=8000")
+        server_address = "0.0.0.0"
+        server_port = 8000
+    else:
+        server_address = str(sys.argv[1])
+        server_port = int(sys.argv[2])
+
     prepare_special_routes()
 
-    server = HTTPServer(("127.0.0.1", 8000), Server)
+    server = HTTPServer((server_address, server_port), Server)
 
     try:
         server.serve_forever()
