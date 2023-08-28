@@ -6,6 +6,7 @@ license = "MIT"
 authors = ["Alexis Razi <razialexis43@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/arazi47/built-to-serve"
+packages = [{include = "webserver-to-go"}]
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/arazi47/built-to-serve"
