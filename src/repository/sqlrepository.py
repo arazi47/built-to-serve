@@ -1,12 +1,5 @@
-import importlib
+from .repository import Repository
 import sqlite3
-
-"""
-    Design proposal:
-Map (object, operation) pair to a specific query to be run.
-Repository name will be <model_class_name>Repository so the model name
-can be extracted.
-"""
 
 query_for_model = {
     "save": "INSERT INTO <modelname> (<attribute>, <attribute>, <attribute>) VALUES (<value>, <value>, <value>)",
@@ -16,14 +9,7 @@ query_for_model = {
     "delete_by_id": "DELETE FROM <modelname> WHERE id = <id>",
 }
 
-class Repository:
-    def __init__(self) -> None:
-        # XxxRepository => Repository
-        self._class_name = self.__class__.__name__[:self.__class__.__name__.rfind("Repository")]
-
-        # The model class can be instantiated if needed (obj = self._class()) 
-        self._class = getattr(importlib.import_module("models"), self._class_name)
-
+class SqlRepository(Repository):
     def execute_query(self, query):
             # Idea: Make guestbook the app's name somehow so it can be accessed globally?
             self.connection = sqlite3.connect("guestbook.db")
@@ -101,6 +87,3 @@ class Repository:
             return False
         else:
             return self.execute_query(self.prepare_query(self._class(id), {}, query_for_model["delete_by_id"]))
-
-    def __iter__(self):
-        return iter(self.fetch_all())
