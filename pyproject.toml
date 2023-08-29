@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "webserver-to-go"
+name = "ws2g"
 version = "0.1.0"
 description = "A webserver to use when you have no time for configuration"
 license = "MIT"
 authors = ["Alexis Razi <razialexis43@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/arazi47/built-to-serve"
-packages = [{include = "webserver-to-go"}]
+packages = [{include = "ws2g"}]
 
 [tool.poetry.urls]
 "Homepage" = "https://github.com/arazi47/built-to-serve"
