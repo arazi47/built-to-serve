@@ -1,4 +1,4 @@
-from repository import Repository
+from .repository import Repository
 import sqlite3
 
 query_for_model = {
