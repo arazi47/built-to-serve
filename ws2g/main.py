@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import sys
 from urllib import parse
-from .views import path_view, prepare_special_routes, BaseView
+from views.views import path_view, prepare_special_routes, BaseView
 
 
 class Server(BaseHTTPRequestHandler):
