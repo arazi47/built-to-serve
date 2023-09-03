@@ -14,18 +14,21 @@ def get_custom_content(file):
 
                 custom_content.append(line)
 
+
 def read_whole_file(file):
     lines = []
     with open(file, "r") as f:
         for line in f:
             lines.append(line)
-    
+
     return lines
+
 
 def write_to_file(file, lines):
     with open(file, "w") as f:
         for line in lines:
             f.write(line)
+
 
 def get_custom_content_index(file):
     in_cc = False
@@ -34,7 +37,7 @@ def get_custom_content_index(file):
         line_index = 0
         for line in f:
             if line.strip() == "{{customcontent}}":
-                cc_end_index = None # reset cc_end_index because of yield
+                cc_end_index = None  # reset cc_end_index because of yield
                 in_cc = True
                 cc_start_index = line_index
             if in_cc:
@@ -44,6 +47,7 @@ def get_custom_content_index(file):
 
                     yield cc_start_index, cc_end_index
             line_index += 1
+
 
 def get_lines_until_end(lines, command="TODO"):
     # Get inside of a block (e.g. all lines inside a for block)
@@ -56,6 +60,7 @@ def get_lines_until_end(lines, command="TODO"):
 
     return output
 
+
 def transform_custom_content_to_html(lines, variables):
     output = []
     i = 0
@@ -63,8 +68,6 @@ def transform_custom_content_to_html(lines, variables):
         split_line = lines[i].replace("{", "").replace("}", "").split()
         command = split_line[0]
         if command == "for":
-            # for for_var in list_var
-            for_var = split_line[1]
             list_var = split_line[3]
 
             # Hopefully variables[list_var] is already something
@@ -72,7 +75,7 @@ def transform_custom_content_to_html(lines, variables):
             # list var can be of type list or an iterable class or...
             # the next line assumes list_var is "repo.fetch_all()"
             iterable = variables[list_var.split(".")[0]]
-            lines_that_have_to_be_repeated = get_lines_until_end(lines[i + 1:])
+            lines_that_have_to_be_repeated = get_lines_until_end(lines[i + 1 :])
             for single_instance in iterable:
                 for j in lines_that_have_to_be_repeated:
                     if "{{" in j and "}}" in j:
@@ -82,28 +85,40 @@ def transform_custom_content_to_html(lines, variables):
                         attr_string = j[opener:ender].split(".")
                         if len(attr_string) == 1:
                             # Plain old value
-                            j = j.replace("{{" + j[opener:ender] + "}}", str(single_instance))
+                            j = j.replace(
+                                "{{" + j[opener:ender] + "}}", str(single_instance)
+                            )
                         else:
                             if j[opener:ender][-1] == ")":
                                 # object.function()
                                 # No support for function parameters
                                 # [:-2] function() => function
-                                j = j.replace("{{" + j[opener:ender] + "}}", str(getattr(single_instance, attr_string[1][:-2])()))
+                                j = j.replace(
+                                    "{{" + j[opener:ender] + "}}",
+                                    str(
+                                        getattr(single_instance, attr_string[1][:-2])()
+                                    ),
+                                )
                             else:
                                 # object.attribute
-                                j = j.replace("{{" + j[opener:ender] + "}}", str(getattr(single_instance, attr_string[1])))
+                                j = j.replace(
+                                    "{{" + j[opener:ender] + "}}",
+                                    str(getattr(single_instance, attr_string[1])),
+                                )
 
                     output.append(j)
-                
+
                 i += len(lines_that_have_to_be_repeated)
         else:
-            # If we can't figure out what the command is, just add the line to the output
+            # If we can't figure out what the command is,
+            # just add the line to the output.
             # This could be something like a <br> etc
             output.append(lines[i])
-        
+
         i += 1
 
     return output
+
 
 def transform_template_to_code(file_path, variables):
     whole_file = read_whole_file(file_path)
@@ -123,6 +138,6 @@ def transform_template_to_code(file_path, variables):
         result += whole_file[prev_cc_end_index + 1 : cc_start_index] + transformed_lines
         prev_cc_end_index = cc_end_index
 
-    result += whole_file[prev_cc_end_index + 1:]
+    result += whole_file[prev_cc_end_index + 1 :]
 
     return "".join(result)
