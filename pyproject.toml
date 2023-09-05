@@ -18,6 +18,7 @@ pymongo = "^4.5.0"
 ruff = "^0.0.287"
 black = "^23.7.0"
 pytest = "^7.4.1"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -27,3 +28,6 @@ build-backend = "poetry.core.masonry.api"
 
 # Never enforce `E902` (E902 The system cannot find the file specified. (os error 2)).
 ignore = ["E902"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib -s --cov=ws2g --cov-report=html"
