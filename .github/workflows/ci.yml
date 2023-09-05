@@ -32,6 +32,14 @@ jobs:
       run: poetry run ruff check . -v
     - name: Run black (dry run)
       run: poetry run black --check . -v
+    - name: Build and install package
+      run: |
+        poetry build
+        pip install dist/$(ls dist | grep .*.whl) 
+    - name: Run unit tests
+      run: |
+        cd tests/custom_content_parser
+        pytest
     - uses: mr-smithers-excellent/docker-build-push@v6
       name: Build & push Docker image
       with:
