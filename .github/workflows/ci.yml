@@ -32,6 +32,10 @@ jobs:
       run: poetry run ruff check . -v
     - name: Run black (dry run)
       run: poetry run black --check . -v
+    - name: Run unit tests
+      run: |
+        cd tests/custom_content_parser
+        poetry run pytest
     - uses: mr-smithers-excellent/docker-build-push@v6
       name: Build & push Docker image
       with:
@@ -39,7 +43,3 @@ jobs:
         registry: docker.io
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Run unit tests
-      run: |
-        cd tests/custom_content_parser
-        pytest
