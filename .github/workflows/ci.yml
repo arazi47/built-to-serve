@@ -39,7 +39,7 @@ jobs:
     - name: Run unit tests
       run: |
         cd tests/custom_content_parser
-        poetry run pytest
+        pytest
     - uses: mr-smithers-excellent/docker-build-push@v6
       name: Build & push Docker image
       with:
