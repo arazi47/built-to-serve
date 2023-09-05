@@ -1,4 +1,4 @@
-from ws2g.custom_content_parser import get_custom_content_index
+from ws2g.custom_content_parser.custom_content_parser import get_custom_content_index
 
 
 def test_get_custom_content_index():
