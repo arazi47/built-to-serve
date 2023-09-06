@@ -30,8 +30,4 @@ build-backend = "poetry.core.masonry.api"
 ignore = ["E902"]
 
 [tool.pytest.ini_options]
-addopts = "--import-mode=importlib -s --cov=ws2g --cov-report=html"
-pythonpath = [
-  ".",
-  "ws2g"
-]
+addopts = "-s --cov=ws2g --cov-report=html"
