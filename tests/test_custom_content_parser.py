@@ -3,7 +3,7 @@ import os
 
 
 def test_get_custom_content_index():
-    file = r"/opt/hostedtoolcache/Python/3.11.5/x64/lib/python3.11/site-packages/ws2g/custom_content_parser/"
+    file = r"/opt/hostedtoolcache/Python/3.11.5/x64/lib/python3.11/site-packages/ws2g/custom_content_parser/custom_content_parser.py"
     with open(file, "r") as f:
         for line in f:
             print(line)
