@@ -41,7 +41,7 @@ jobs:
     - name: Run unit tests x
       if: always()
       # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: python -m pytest test
+      run: python -m pytest tests
     - name: Run unit tests 4
       if: always()
       # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest

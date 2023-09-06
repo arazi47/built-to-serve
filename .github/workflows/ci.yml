@@ -5,9 +5,9 @@ name: WS2G push & PR CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "mains" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "mains" ]
 
 permissions:
   contents: read
