@@ -28,38 +28,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install poetry
         poetry install
-    # - name: Run ruff
-    #   run: poetry run ruff check . -v
-    # - name: Run black (dry run)
-    #   run: poetry run black --check . -v
-    - name: Build and install package
-      run: |
-        poetry build
-        pip install dist/$(ls dist | grep .*.whl) 
-    - name: Install pytest
-      run: pip install pytest
-    - name: Install pytest-cov
-      run: pip install pytest-cov
-    - name: Run unit tests 3
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: pytest
-    - name: Run unit tests x
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: python -m pytest test
-    - name: Run unit tests 4
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: python -m pytest
-    - name: Run unit tests 7
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: pytest tests
-    - name: Run unit tests 8
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: python -m pytest tests
+    - name: Run ruff
+      run: poetry run ruff check . -v
+    - name: Run black (dry run)
+      run: poetry run black --check . -v
     - uses: mr-smithers-excellent/docker-build-push@v6
       name: Build & push Docker image
       with:
