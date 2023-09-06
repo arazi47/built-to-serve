@@ -5,7 +5,7 @@ import os
 def test_get_custom_content_index():
     file = r"/opt/hostedtoolcache/Python/3.11.5/x64/lib/python3.11/site-packages/ws2g/custom_content_parser/"
     with open(file, "r") as f:
-        for line in file:
+        for line in f:
             print(line)
 
     # expected_indices = [(23, 27), (38, 47)]
