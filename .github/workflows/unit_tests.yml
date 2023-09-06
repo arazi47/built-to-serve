@@ -5,9 +5,9 @@ name: WS2G push & PR unit tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "mainz" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "mainz" ]
 
 permissions:
   contents: read
