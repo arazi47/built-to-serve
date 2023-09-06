@@ -6,7 +6,7 @@ def test_get_custom_content_index():
     expected_indices = [(23, 27), (38, 47)]
 
     iterator = get_custom_content_index(
-        os.path.dirname(__file__) + "\\test_file_input.html"
+        os.path.dirname(__file__) + "//test_file_input.html"
     )
 
     for expected_cc_start_index, expected_cc_end_index in expected_indices:
