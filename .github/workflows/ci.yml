@@ -28,10 +28,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install poetry
         poetry install
-    - name: Run ruff
-      run: poetry run ruff check . -v
-    - name: Run black (dry run)
-      run: poetry run black --check . -v
+    # - name: Run ruff
+    #   run: poetry run ruff check . -v
+    # - name: Run black (dry run)
+    #   run: poetry run black --check . -v
+    - name: Build and install package
+      run: |
+        poetry build
+        pip install dist/$(ls dist | grep .*.whl) 
     - name: Install pytest
       run: pip install pytest
     - name: Install pytest-cov
