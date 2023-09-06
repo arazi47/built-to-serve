@@ -7,7 +7,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main", "make-tests-run-locally-and-on-ci" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
