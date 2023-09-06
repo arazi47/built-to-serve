@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: WS2G push & PR CI
+name: CI (linters, unit testing, pushing Docker image)
 
 on:
   push:
@@ -36,7 +36,6 @@ jobs:
         poetry build
         pip install dist/$(ls dist | grep .*.whl)
     - name: Run unit tests
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
       run: pytest
     - uses: mr-smithers-excellent/docker-build-push@v6
       name: Build & push Docker image
