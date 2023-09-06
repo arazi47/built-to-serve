@@ -30,10 +30,10 @@ jobs:
       run: |
         poetry build
         pip install dist/$(ls dist | grep .*.whl)
-    - name: Install pytest
-      run: pip install pytest
-    - name: Install pytest-cov
-      run: pip install pytest-cov
+    # - name: Install pytest
+    #   run: pip install pytest
+    # - name: Install pytest-cov
+    #   run: pip install pytest-cov
     - name: pip show ws2g
       run: pip show ws2g
     - name: which pip
@@ -44,8 +44,8 @@ jobs:
       run: which python
     - name: cd tests
       run: cd tests
-    - name: set pythonpath
-      run: echo "::set-env name=PYTHONPATH::/home/runner/work/built-to-serve/built-to-serve/"
+    # - name: set pythonpath
+    #   run: echo "::set-env name=PYTHONPATH::/home/runner/work/built-to-serve/built-to-serve/"
     - name: echo pythonpath
       run: echo $PYTHONPATH
     - name: Run unit tests 3
