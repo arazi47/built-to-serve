@@ -29,13 +29,19 @@ jobs:
     - name: Build and install package
       run: |
         poetry build
-        pip install dist/$(ls dist | grep .*.whl) 
+        pip install dist/$(ls dist | grep .*.whl)
     - name: Install pytest
       run: pip install pytest
     - name: Install pytest-cov
       run: pip install pytest-cov
     - name: pip show ws2g
       run: pip show ws2g
+    - name: which pip
+      run: which pip
+    - name: which pytest
+      run: which pytest
+    - name: which ws2g
+      run: which ws2g
     - name: cd tests
       run: cd tests
     - name: Run unit tests 3
