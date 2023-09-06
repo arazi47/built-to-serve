@@ -40,32 +40,18 @@ jobs:
       run: pip install pytest
     - name: Install pytest-cov
       run: pip install pytest-cov
-    - name: Run unit tests
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: poetry run python -m pytest
-    - name: Run unit tests 2
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: poetry run pytest
     - name: Run unit tests 3
       if: always()
       # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
       run: pytest
+    - name: Run unit tests x
+      if: always()
+      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
+      run: python -m pytest test
     - name: Run unit tests 4
       if: always()
       # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
       run: python -m pytest
-    - name: Run unit tests 5
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: |
-        export PYTHONPATH=.
-        poetry run python -m pytest tests
-    - name: Run unit tests 6
-      if: always()
-      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
-      run: poetry run pytest tests
     - name: Run unit tests 7
       if: always()
       # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
