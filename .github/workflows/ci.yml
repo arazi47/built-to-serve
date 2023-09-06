@@ -32,12 +32,11 @@ jobs:
       run: poetry run ruff check . -v
     - name: Run black (dry run)
       run: poetry run black --check . -v
-    - name: Build and install package
-      run: |
-        poetry build
-        pip install dist/$(ls dist | grep .*.whl) 
+    - name: Install pytest
+      run: pip install pytest
     - name: Run unit tests
-      run: pytest --cov=ws2g --cov-report=html
+      # https://docs.pytest.org/en/7.1.x/explanation/pythonpath.html#invoking-pytest-versus-python-m-pytest
+      run: pythom -m pytest
     - uses: mr-smithers-excellent/docker-build-push@v6
       name: Build & push Docker image
       with:
