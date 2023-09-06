@@ -44,6 +44,8 @@ jobs:
       run: which python
     - name: cd tests
       run: cd tests
+    - name: set pythonpath
+      run: echo "::set-env name=PYTHONPATH::/home/runner/work/built-to-serve/built-to-serve/"
     - name: echo pythonpath
       run: echo $PYTHONPATH
     - name: Run unit tests 3
