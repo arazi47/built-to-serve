@@ -1,8 +1,10 @@
 import os
+import ws2g
 from ws2g.custom_content_parser.custom_content_parser import get_custom_content_index
 
 
 def test_get_custom_content_index():
+    print(ws2g.__file__)
     expected_indices = [(23, 27), (38, 47)]
 
     iterator = get_custom_content_index(
