@@ -16,6 +16,12 @@
   <a href="https://github.com/arazi47/built-to-serve/issues"><img src="https://img.shields.io/github/issues/arazi47/built-to-serve"></a>
 </p>
 
+# Insallation
+WS2G can be installed via `pip`. The project is avalbale on [pypi](https://pypi.org/project/ws2g/).
+
+```console
+pip install ws2g
+```
 
 # Get started
 First, take a look at the example app, found [here](https://github.com/arazi47/built-to-serve-testing-app).
