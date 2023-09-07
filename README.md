@@ -1,6 +1,21 @@
-# Built to Serve
+<h1 align="center">Webserver to go</h1>
 
-Easy to use web server written in Python.
+<!--
+[![Github Actions CI](https://img.shields.io/github/actions/workflow/status/arazi47/built-to-serve/.github%2Fworkflows%2Fci.yml)](https://github.com/arazi47/built-to-serve/actions/workflows/ci.yml)
+![Supported Python versions](https://img.shields.io/badge/python-3.11-pink)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
+[![GitHub issues open](https://img.shields.io/github/issues/arazi47/built-to-serve)](https://github.com/arazi47/built-to-serve/issues)
+-->
+
+<p align="center">
+  <a href="https://img.shields.io/github/actions/workflow/status/arazi47/built-to-serve/.github%2Fworkflows%2Fci.yml"><img src="https://img.shields.io/github/actions/workflow/status/arazi47/built-to-serve/.github%2Fworkflows%2Fci.yml"></a>
+  <a href="https://img.shields.io/badge/python-3.11-pink"><img src="https://img.shields.io/badge/python-3.11-pink"></a>
+  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <a href="https://github.com/arazi47/built-to-serve/issues"><img src="https://img.shields.io/github/issues/arazi47/built-to-serve"></a>
+</p>
+
 
 # Get started
 First, take a look at the example app, found [here](https://github.com/arazi47/built-to-serve-testing-app).
