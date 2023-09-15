@@ -1,5 +1,12 @@
+CONTENT_DIRECTORY_NAME = "content"
+
+# Public routes, defined by user
+# TODO rename this to public_routes
+# or find a more suitable name
 path_view = {}
 
+# Inaccessible to users
+private_routes = {}
 
 def route(identifier, path=None):
     if not path:
@@ -9,9 +16,9 @@ def route(identifier, path=None):
         # Route path to an instance of the class
         # [1:] - without leading '/'
         file_path = path[1:]
-        file_path = "content/" + file_path
-        if file_path == "content/":
-            file_path = "content/index.html"
+        file_path = CONTENT_DIRECTORY_NAME + "/" + file_path
+        if file_path == CONTENT_DIRECTORY_NAME + "/":
+            file_path = CONTENT_DIRECTORY_NAME + "/index.html"
 
         path_view[identifier] = view_class(file_path)
         return view_class
@@ -48,8 +55,17 @@ class BaseView:
         )
 
 
+class HTML(BaseView):
+    def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
+        super().__init__(file_path, status_code, content_type)
+
+    def build_GET_response(self) -> str:
+        with open(self.file_path) as f:
+            return f.read() 
+
+
 class CSS(BaseView):
-    def __init__(self, file_path, status_code=200, content_type="text/css") -> None:
+    def __init__(self, file_path, status_code=404, content_type="text/css") -> None:
         super().__init__(file_path, status_code, content_type)
 
     def build_GET_response(self) -> str:
@@ -59,7 +75,7 @@ class CSS(BaseView):
 
 class JavaScript(BaseView):
     def __init__(
-        self, file_path="", status_code=200, content_type="text/javascript"
+        self, file_path="", status_code=404, content_type="text/javascript"
     ) -> None:
         super().__init__(file_path, status_code, content_type)
 
@@ -69,7 +85,7 @@ class JavaScript(BaseView):
 
 
 class PHP(BaseView):
-    def __init__(self, file_path="", status_code=200, content_type="text/html") -> None:
+    def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
         super().__init__(file_path, status_code, content_type)
 
     def build_GET_response(self) -> str:
@@ -78,52 +94,48 @@ class PHP(BaseView):
 
 
 class Image(BaseView):
-    def __init__(self, file_path, status_code=200, content_type="image/jpeg") -> None:
+    def __init__(self, file_path, status_code=404, content_type="image/jpeg") -> None:
         super().__init__(file_path, status_code, content_type)
 
     def build_GET_response(self) -> str:
         with open(self.file_path, "rb") as f:
             return f.read()
 
-
-def prepare_special_routes():
+def index_files_in_content(path_to_content=""):
     import glob
     import os
 
     # There are probably more cases that should be handled
     image_extensions = ["gif", "jpg", "png", "tiff"]
 
-    # root_dir needs a trailing slash (i.e. /root/dir/)
-    for file_path in glob.iglob("content/" + "**/**", recursive=True):
+    for file_path in glob.iglob(path_to_content + "/" + CONTENT_DIRECTORY_NAME + "/" + "**/*.*", recursive=True):
         file_path = file_path.lower()
         file_path = file_path.replace("\\", "/")
 
-        request_path = file_path[file_path.find("/", 2) :]
+        request_path = file_path[file_path.find(CONTENT_DIRECTORY_NAME):]
         if (
             os.path.isfile(file_path)
-            and not file_path.endswith(".html")
-            and request_path not in path_view
+            and request_path not in private_routes
         ):
-            if file_path.endswith(".css"):
-                path_view[request_path] = CSS(file_path, status_code=200)
+            if file_path.endswith(".html"):
+                private_routes[request_path] = HTML(file_path)
+            elif file_path.endswith(".css"):
+                private_routes[request_path] = CSS(file_path)
             elif any(file_path.endswith(ext) for ext in image_extensions):
                 content_type = file_path[file_path.rfind(".") + 1 :]
                 if content_type == "jpg":
                     content_type = "jpeg"
 
-                path_view[request_path] = Image(
+                private_routes[request_path] = Image(
                     file_path, content_type="image/" + content_type
                 )
             elif file_path.endswith(".svg"):
-                path_view[request_path] = Image(
+                private_routes[request_path] = Image(
                     file_path, content_type="image/" + "svg+xml"
                 )
             elif file_path.endswith(".js"):
-                path_view[request_path] = JavaScript(file_path)
+                private_routes[request_path] = JavaScript(file_path)
             elif file_path.endswith(".php"):
-                path_view[request_path] = PHP(file_path)
+                private_routes[request_path] = PHP(file_path)
             else:
                 print("Unhandled special route:", file_path)
-
-    # for k, v in path_view.items():
-    #     print(k, v)

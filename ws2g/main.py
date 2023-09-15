@@ -2,7 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import sys
 from urllib import parse
-from .views.views import path_view, prepare_special_routes, BaseView
+from .views.views import path_view, index_files_in_content, BaseView
 
 
 class Server(BaseHTTPRequestHandler):
@@ -52,7 +52,7 @@ def run():
         server_address = str(sys.argv[1])
         server_port = int(sys.argv[2])
 
-    prepare_special_routes()
+    index_files_in_content()
 
     server = HTTPServer((server_address, server_port), Server)
 
