@@ -8,6 +8,7 @@ path_view = {}
 # Inaccessible to users
 private_routes = {}
 
+
 def route(identifier, path=None):
     if not path:
         path = identifier
@@ -61,7 +62,7 @@ class HTML(BaseView):
 
     def build_GET_response(self) -> str:
         with open(self.file_path) as f:
-            return f.read() 
+            return f.read()
 
 
 class CSS(BaseView):
@@ -101,6 +102,7 @@ class Image(BaseView):
         with open(self.file_path, "rb") as f:
             return f.read()
 
+
 def index_files_in_content(path_to_content=""):
     import glob
     import os
@@ -108,15 +110,14 @@ def index_files_in_content(path_to_content=""):
     # There are probably more cases that should be handled
     image_extensions = ["gif", "jpg", "png", "tiff"]
 
-    for file_path in glob.iglob(path_to_content + "/" + CONTENT_DIRECTORY_NAME + "/" + "**/*.*", recursive=True):
+    for file_path in glob.iglob(
+        path_to_content + "/" + CONTENT_DIRECTORY_NAME + "/" + "**/*.*", recursive=True
+    ):
         file_path = file_path.lower()
         file_path = file_path.replace("\\", "/")
 
-        request_path = file_path[file_path.find(CONTENT_DIRECTORY_NAME):]
-        if (
-            os.path.isfile(file_path)
-            and request_path not in private_routes
-        ):
+        request_path = file_path[file_path.find(CONTENT_DIRECTORY_NAME) :]
+        if os.path.isfile(file_path) and request_path not in private_routes:
             if file_path.endswith(".html"):
                 private_routes[request_path] = HTML(file_path)
             elif file_path.endswith(".css"):
