@@ -5,8 +5,8 @@ CONTENT_DIRECTORY_NAME = "content"
 # or find a more suitable name
 path_view = {}
 
-# Inaccessible to users
-private_routes = {}
+# All files from CONTENT_DIRECTORY_NAME are indexed here
+content_routes = {}
 
 
 def route(identifier, path=None):
@@ -117,26 +117,28 @@ def index_files_in_content(path_to_content=""):
         file_path = file_path.replace("\\", "/")
 
         request_path = file_path[file_path.find(CONTENT_DIRECTORY_NAME) :]
-        if os.path.isfile(file_path) and request_path not in private_routes:
+        if os.path.isfile(file_path) and request_path not in content_routes:
             if file_path.endswith(".html"):
-                private_routes[request_path] = HTML(file_path)
+                content_routes[request_path] = HTML(file_path, status_code=200)
             elif file_path.endswith(".css"):
-                private_routes[request_path] = CSS(file_path)
+                content_routes[request_path] = CSS(file_path, status_code=200)
             elif any(file_path.endswith(ext) for ext in image_extensions):
                 content_type = file_path[file_path.rfind(".") + 1 :]
                 if content_type == "jpg":
                     content_type = "jpeg"
 
-                private_routes[request_path] = Image(
-                    file_path, content_type="image/" + content_type
+                content_routes[request_path] = Image(
+                    file_path, status_code=200, content_type="image/" + content_type
                 )
             elif file_path.endswith(".svg"):
-                private_routes[request_path] = Image(
-                    file_path, content_type="image/" + "svg+xml"
+                content_routes[request_path] = Image(
+                    file_path,
+                    status_code=200,
+                    content_type="image/" + "svg+xml",
                 )
             elif file_path.endswith(".js"):
-                private_routes[request_path] = JavaScript(file_path)
+                content_routes[request_path] = JavaScript(file_path, status_code=200)
             elif file_path.endswith(".php"):
-                private_routes[request_path] = PHP(file_path)
+                content_routes[request_path] = PHP(file_path, status_code=200)
             else:
                 print("Unhandled special route:", file_path)
