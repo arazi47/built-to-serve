@@ -8,8 +8,8 @@ def test_prepare_special_routes():
     index_files_in_content(os.path.dirname(__file__))
 
     expected_content_routes = {
-        "content/thing.html": HTML(),
-        "content/somefolder/thing_inside_folder.html": HTML(),
+        "/thing.html": HTML(),
+        "/somefolder/thing_inside_folder.html": HTML(),
     }
 
     assert len(content_routes) == len(expected_content_routes)

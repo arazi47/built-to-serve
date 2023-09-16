@@ -1,11 +1,7 @@
 CONTENT_DIRECTORY_NAME = "content"
 
-# Public routes, defined by user
-# TODO rename this to public_routes
-# or find a more suitable name
-path_view = {}
-
-# All files from CONTENT_DIRECTORY_NAME are indexed here
+# Stores all user defined routes and
+# all routes created from files inside CONTENT_DIRECTORY_NAME
 content_routes = {}
 
 
@@ -21,14 +17,14 @@ def route(identifier, path=None):
         if file_path == CONTENT_DIRECTORY_NAME + "/":
             file_path = CONTENT_DIRECTORY_NAME + "/index.html"
 
-        path_view[identifier] = view_class(file_path)
+        content_routes[identifier] = view_class(file_path)
         return view_class
 
     return wrapper
 
 
-def render(page):
-    return path_view[page].build_GET_response()
+def render(path):
+    return content_routes[path].build_GET_response()
 
 
 class BaseView:
@@ -103,20 +99,26 @@ class Image(BaseView):
             return f.read()
 
 
-def index_files_in_content(path_to_content=""):
+def index_files_in_content(full_path_to_content_dir=""):
     import glob
     import os
 
     # There are probably more cases that should be handled
     image_extensions = ["gif", "jpg", "png", "tiff"]
 
+    if full_path_to_content_dir and full_path_to_content_dir[-1] != "/":
+        full_path_to_content_dir += "/"
+
     for file_path in glob.iglob(
-        path_to_content + "/" + CONTENT_DIRECTORY_NAME + "/" + "**/*.*", recursive=True
+        full_path_to_content_dir + CONTENT_DIRECTORY_NAME + "/" + "**/*.*",
+        recursive=True,
     ):
         file_path = file_path.lower()
         file_path = file_path.replace("\\", "/")
 
-        request_path = file_path[file_path.find(CONTENT_DIRECTORY_NAME) :]
+        request_path = file_path[
+            file_path.find(CONTENT_DIRECTORY_NAME) + len(CONTENT_DIRECTORY_NAME) :
+        ]
         if os.path.isfile(file_path) and request_path not in content_routes:
             if file_path.endswith(".html"):
                 content_routes[request_path] = HTML(file_path, status_code=200)
