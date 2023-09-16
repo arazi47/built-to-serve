@@ -1,5 +1,5 @@
 import os
-from ws2g.views.views import HTML, content_routes, index_files_in_content
+from ws2g.views.views import HTMLFileView, content_routes, index_files_in_content
 
 
 def test_prepare_special_routes():
@@ -8,8 +8,8 @@ def test_prepare_special_routes():
     index_files_in_content(os.path.dirname(__file__))
 
     expected_content_routes = {
-        "/thing.html": HTML(),
-        "/somefolder/thing_inside_folder.html": HTML(),
+        "/thing.html": HTMLFileView(),
+        "/somefolder/thing_inside_folder.html": HTMLFileView(),
     }
 
     assert len(content_routes) == len(expected_content_routes)

@@ -52,7 +52,7 @@ class BaseView:
         )
 
 
-class HTML(BaseView):
+class HTMLFileView(BaseView):
     def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
         super().__init__(file_path, status_code, content_type)
 
@@ -61,7 +61,7 @@ class HTML(BaseView):
             return f.read()
 
 
-class CSS(BaseView):
+class CSSFileView(BaseView):
     def __init__(self, file_path, status_code=404, content_type="text/css") -> None:
         super().__init__(file_path, status_code, content_type)
 
@@ -70,7 +70,7 @@ class CSS(BaseView):
             return f.read()
 
 
-class JavaScript(BaseView):
+class JavaScriptFileView(BaseView):
     def __init__(
         self, file_path="", status_code=404, content_type="text/javascript"
     ) -> None:
@@ -81,7 +81,7 @@ class JavaScript(BaseView):
             return f.read()
 
 
-class PHP(BaseView):
+class PHPFileView(BaseView):
     def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
         super().__init__(file_path, status_code, content_type)
 
@@ -90,12 +90,21 @@ class PHP(BaseView):
             return f.read()
 
 
-class Image(BaseView):
+class ImageFileView(BaseView):
     def __init__(self, file_path, status_code=404, content_type="image/jpeg") -> None:
         super().__init__(file_path, status_code, content_type)
 
     def build_GET_response(self) -> str:
         with open(self.file_path, "rb") as f:
+            return f.read()
+
+
+class MiscFileView(BaseView):
+    def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
+        super().__init__(file_path, status_code, content_type)
+
+    def build_GET_response(self) -> str:
+        with open(self.file_path) as f:
             return f.read()
 
 
@@ -121,26 +130,26 @@ def index_files_in_content(full_path_to_content_dir=""):
         ]
         if os.path.isfile(file_path) and request_path not in content_routes:
             if file_path.endswith(".html"):
-                content_routes[request_path] = HTML(file_path, status_code=200)
+                content_routes[request_path] = HTMLFileView(file_path, status_code=200)
             elif file_path.endswith(".css"):
-                content_routes[request_path] = CSS(file_path, status_code=200)
+                content_routes[request_path] = CSSFileView(file_path, status_code=200)
             elif any(file_path.endswith(ext) for ext in image_extensions):
                 content_type = file_path[file_path.rfind(".") + 1 :]
                 if content_type == "jpg":
                     content_type = "jpeg"
 
-                content_routes[request_path] = Image(
+                content_routes[request_path] = ImageFileView(
                     file_path, status_code=200, content_type="image/" + content_type
                 )
             elif file_path.endswith(".svg"):
-                content_routes[request_path] = Image(
+                content_routes[request_path] = ImageFileView(
                     file_path,
                     status_code=200,
                     content_type="image/" + "svg+xml",
                 )
             elif file_path.endswith(".js"):
-                content_routes[request_path] = JavaScript(file_path, status_code=200)
+                content_routes[request_path] = JavaScriptFileView(file_path, status_code=200)
             elif file_path.endswith(".php"):
-                content_routes[request_path] = PHP(file_path, status_code=200)
+                content_routes[request_path] = PHPFileView(file_path, status_code=200)
             else:
-                print("Unhandled special route:", file_path)
+                content_routes[request_path] = MiscFileView(file_path, status_code=200)
