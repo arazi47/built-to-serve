@@ -2,12 +2,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import sys
 from urllib import parse
-from .views.views import path_view, prepare_special_routes, BaseView
+from .views.views import content_routes, index_files_in_content, BaseView
 
 
 class Server(BaseHTTPRequestHandler):
     def do_POST(self):
-        view = path_view[self.path]
+        view = content_routes[self.path]
         length = int(self.headers.get("content-length"))
         field_data = self.rfile.read(length)
         fields = parse.parse_qs(str(field_data, "UTF-8"), keep_blank_values=True)
@@ -21,7 +21,7 @@ class Server(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            view = path_view[self.path]
+            view = content_routes[self.path]
             response = view.build_GET_response()
 
             self.send_response(view.status_code)
@@ -52,7 +52,7 @@ def run():
         server_address = str(sys.argv[1])
         server_port = int(sys.argv[2])
 
-    prepare_special_routes()
+    index_files_in_content()
 
     server = HTTPServer((server_address, server_port), Server)
 
