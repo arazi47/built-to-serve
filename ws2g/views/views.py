@@ -1,4 +1,8 @@
+import os
+import glob
 import re
+
+from ws2g.views.view_helper import ViewHelper
 
 CONTENT_DIRECTORY_NAME = "content"
 
@@ -160,11 +164,17 @@ class MiscFileView(BaseView):
 
 
 def index_files_in_content(full_path_to_content_dir=""):
-    import glob
-    import os
-
-    # There are probably more cases that should be handled
-    image_extensions = ["gif", "jpg", "png", "tiff"]
+    extension_view_class = {
+        "html": HTMLFileView,
+        "css": CSSFileView,
+        "js": JavaScriptFileView,
+        "php": PHPFileView,
+        "gif": ImageFileView,
+        "jpg": ImageFileView,
+        "png": ImageFileView,
+        "tiff": ImageFileView,
+        "svg": ImageFileView,
+    }
 
     if full_path_to_content_dir and full_path_to_content_dir[-1] != "/":
         full_path_to_content_dir += "/"
@@ -180,29 +190,19 @@ def index_files_in_content(full_path_to_content_dir=""):
             file_path.find(CONTENT_DIRECTORY_NAME) + len(CONTENT_DIRECTORY_NAME) :
         ]
         if os.path.isfile(file_path) and request_path not in content_routes:
-            if file_path.endswith(".html"):
-                content_routes[request_path] = HTMLFileView(file_path, status_code=200)
-            elif file_path.endswith(".css"):
-                content_routes[request_path] = CSSFileView(file_path, status_code=200)
-            elif any(file_path.endswith(ext) for ext in image_extensions):
-                content_type = file_path[file_path.rfind(".") + 1 :]
-                if content_type == "jpg":
-                    content_type = "jpeg"
+            file_extension = ViewHelper.get_file_extension(file_path)
+            content_type = ViewHelper.get_content_type(file_extension)
 
-                content_routes[request_path] = ImageFileView(
-                    file_path, status_code=200, content_type="image/" + content_type
+            if file_extension not in extension_view_class:
+                print(
+                    "Warning, unsupported file "
+                    + file_path
+                    + '. Interpreting as misc file (content_type="text/html").'
                 )
-            elif file_path.endswith(".svg"):
-                content_routes[request_path] = ImageFileView(
-                    file_path,
-                    status_code=200,
-                    content_type="image/" + "svg+xml",
+                content_routes[request_path] = MiscFileView(
+                    file_path, status_code=200, content_type="text/html"
                 )
-            elif file_path.endswith(".js"):
-                content_routes[request_path] = JavaScriptFileView(
-                    file_path, status_code=200
-                )
-            elif file_path.endswith(".php"):
-                content_routes[request_path] = PHPFileView(file_path, status_code=200)
             else:
-                content_routes[request_path] = MiscFileView(file_path, status_code=200)
+                content_routes[request_path] = extension_view_class[file_extension](
+                    file_path, status_code=200, content_type=content_type
+                )

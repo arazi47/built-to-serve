@@ -6,9 +6,20 @@ from .views.views import (
     get_route_for_path,
     index_files_in_content,
 )
+from .views.view_helper import ViewHelper
 
 
 class Server(BaseHTTPRequestHandler):
+    def send_headers(self, headers):
+        for header_keyword, header_value in headers.items():
+            self.send_header(header_keyword, header_value)
+
+    def send_view(self, view):
+        """Send response, headers and end headers"""
+        self.send_response(view.status_code)
+        self.send_headers(view.headers)
+        self.end_headers()
+
     def do_POST(self):
         try:
             view = get_route_for_path(self.path)
@@ -23,10 +34,7 @@ class Server(BaseHTTPRequestHandler):
         fields = parse.parse_qs(str(field_data, "UTF-8"), keep_blank_values=True)
         response = view.build_POST_response(fields)
 
-        self.send_response(view.status_code)
-        for header_keyword, header_value in view.headers.items():
-            self.send_header(header_keyword, header_value)
-        self.end_headers()
+        self.send_view(view)
         self.wfile.write(bytes(response, "utf-8"))
 
     def do_GET(self):
@@ -40,12 +48,8 @@ class Server(BaseHTTPRequestHandler):
 
         response = view.build_GET_response()
 
-        self.send_response(view.status_code)
-        for header_keyword, header_value in view.headers.items():
-            self.send_header(header_keyword, header_value)
-        self.end_headers()
-
-        if view.headers["Content-type"].startswith("image/"):
+        self.send_view(view)
+        if ViewHelper.is_image_content_type(view.headers["Content-type"]):
             self.wfile.write(bytes(response))
         else:
             self.wfile.write(bytes(response, "utf-8"))
