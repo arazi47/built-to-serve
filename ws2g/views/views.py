@@ -148,7 +148,9 @@ def index_files_in_content(full_path_to_content_dir=""):
                     content_type="image/" + "svg+xml",
                 )
             elif file_path.endswith(".js"):
-                content_routes[request_path] = JavaScriptFileView(file_path, status_code=200)
+                content_routes[request_path] = JavaScriptFileView(
+                    file_path, status_code=200
+                )
             elif file_path.endswith(".php"):
                 content_routes[request_path] = PHPFileView(file_path, status_code=200)
             else:
