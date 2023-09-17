@@ -1,8 +1,59 @@
+import re
+
 CONTENT_DIRECTORY_NAME = "content"
 
 # Stores all user defined routes and
 # all routes created from files inside CONTENT_DIRECTORY_NAME
 content_routes = {}
+
+
+# Returns True if string has the form <var>
+def is_variable(string):
+    if len(string) < 3:
+        return False
+
+    if string[0] != "<" or string[-1] != ">":
+        return False
+
+    # Eliminate the < > pair
+    string = string[1:-1]
+
+    return string.isidentifier()
+
+
+def get_route_for_path(path):
+    if path in content_routes:
+        return content_routes[path]
+
+    # content_routes entry: /thing/<var1>/asd/<var2>/etc
+    # path: /thing/hithere/asd/12/etc
+
+    path = path.split("/")
+    for route_identifier in content_routes.keys():
+        patterns_match = True
+        route_identifier = route_identifier.split()
+
+        # If they split the same
+        if len(path) == len(route_identifier):
+            for path_elem, identifier_elem in zip(path, route_identifier):
+                if is_variable(identifier_elem):
+                    # Check that path_elem contains only numbers, alphas and _
+                    if not re.fullmatch(r"[\w\d_]+", path_elem):
+                        patterns_match = False
+                        break
+                else:
+                    if path_elem != identifier_elem:
+                        patterns_match = False
+                        break
+
+        if patterns_match:
+            return content_routes[route_identifier]
+
+    raise KeyError(
+        "Exception for path="
+        + path
+        + ". The path is either not routed correctly or not created at all."
+    )
 
 
 def route(identifier, path=None):

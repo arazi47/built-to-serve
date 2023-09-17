@@ -2,12 +2,22 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import sys
 from urllib import parse
-from .views.views import content_routes, index_files_in_content, BaseView
+from .views.views import (
+    get_route_for_path,
+    index_files_in_content,
+)
 
 
 class Server(BaseHTTPRequestHandler):
     def do_POST(self):
-        view = content_routes[self.path]
+        try:
+            view = get_route_for_path(self.path)
+        except KeyError as e:
+            self.send_response(404)
+            self.end_headers()
+
+            raise e
+
         length = int(self.headers.get("content-length"))
         field_data = self.rfile.read(length)
         fields = parse.parse_qs(str(field_data, "UTF-8"), keep_blank_values=True)
@@ -21,24 +31,24 @@ class Server(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            view = content_routes[self.path]
-            response = view.build_GET_response()
-
-            self.send_response(view.status_code)
-            for header_keyword, header_value in view.headers.items():
-                self.send_header(header_keyword, header_value)
+            view = get_route_for_path(self.path)
+        except KeyError as e:
+            self.send_response(404)
             self.end_headers()
 
-            if view.headers["Content-type"].startswith("image/"):
-                self.wfile.write(bytes(response))
-            else:
-                self.wfile.write(bytes(response, "utf-8"))
-        except Exception as e:
-            print(e)
-            # print("We got here", self.path)
-            view = BaseView()
-            self.send_response(view.status_code)
-            self.end_headers()
+            raise e
+
+        response = view.build_GET_response()
+
+        self.send_response(view.status_code)
+        for header_keyword, header_value in view.headers.items():
+            self.send_header(header_keyword, header_value)
+        self.end_headers()
+
+        if view.headers["Content-type"].startswith("image/"):
+            self.wfile.write(bytes(response))
+        else:
+            self.wfile.write(bytes(response, "utf-8"))
 
 
 def run():
