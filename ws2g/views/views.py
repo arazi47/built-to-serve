@@ -11,8 +11,8 @@ CONTENT_DIRECTORY_NAME = "content"
 content_routes = {}
 
 
-# Returns True if string has the form <var>
-def is_variable(string):
+def has_variable_form(string):
+    """Returns True if string has the form <var>"""
     if len(string) < 3:
         return False
 
@@ -25,39 +25,50 @@ def is_variable(string):
     return string.isidentifier()
 
 
-def get_route_for_path(path):
+def get_route_and_variables_for_path(path):
+    """Return the correct function to exeecute for given path
+    along with the extracted variables."""
     if path in content_routes:
         return content_routes[path]
 
     # content_routes entry: /thing/<var1>/asd/<var2>/etc
     # path: /thing/hithere/asd/12/etc
 
+    var_names = []
+    var_values = []
+
     path = path.split("/")
     for route_identifier in content_routes.keys():
         patterns_match = True
-        route_identifier = route_identifier.split()
+        route_identifier = route_identifier.split("/")
 
         # If they split the same
         if len(path) == len(route_identifier):
             for path_elem, identifier_elem in zip(path, route_identifier):
-                if is_variable(identifier_elem):
+                if has_variable_form(identifier_elem):
                     # Check that path_elem contains only numbers, alphas and _
                     if not re.fullmatch(r"[\w\d_]+", path_elem):
                         patterns_match = False
                         break
+                    else:
+                        var_names.append(identifier_elem)
+                        var_values.append(path_elem)
                 else:
                     if path_elem != identifier_elem:
                         patterns_match = False
                         break
 
         if patterns_match:
-            return content_routes[route_identifier]
+            return content_routes[route_identifier], var_names, var_values
 
     raise KeyError(
         "Exception for path="
         + path
         + ". The path is either not routed correctly or not created at all."
     )
+
+
+content_types = {}
 
 
 def route(identifier, path=None):
@@ -73,6 +84,9 @@ def route(identifier, path=None):
             file_path = CONTENT_DIRECTORY_NAME + "/index.html"
 
         content_routes[identifier] = view_class(file_path)
+        content_types[identifier] = ViewHelper.get_content_type_for_extension(
+            ViewHelper.get_file_extension(file_path)
+        )
         return view_class
 
     return wrapper
@@ -191,7 +205,7 @@ def index_files_in_content(full_path_to_content_dir=""):
         ]
         if os.path.isfile(file_path) and request_path not in content_routes:
             file_extension = ViewHelper.get_file_extension(file_path)
-            content_type = ViewHelper.get_content_type(file_extension)
+            content_type = ViewHelper.get_content_type_for_extension(file_extension)
 
             if file_extension not in extension_view_class:
                 print(

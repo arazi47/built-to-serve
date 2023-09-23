@@ -15,7 +15,7 @@ class ViewHelper:
         return extension
 
     @staticmethod
-    def get_content_type(file_extension):
+    def get_content_type_for_extension(file_extension):
         if file_extension == "html":
             return "text/html"
         elif file_extension == "css":
