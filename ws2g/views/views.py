@@ -28,18 +28,19 @@ def has_variable_form(string):
 def get_route_and_variables_for_path(path):
     """Return the correct function to exeecute for given path
     along with the extracted variables."""
+    var_names = []
+    var_values = []
+
     if path in content_routes:
-        return content_routes[path]
+        return content_routes[path], var_names, var_values
 
     # content_routes entry: /thing/<var1>/asd/<var2>/etc
     # path: /thing/hithere/asd/12/etc
 
-    var_names = []
-    var_values = []
-
     path = path.split("/")
     for route_identifier in content_routes.keys():
         patterns_match = True
+        original_route_identifier = route_identifier
         route_identifier = route_identifier.split("/")
 
         # If they split the same
@@ -59,7 +60,7 @@ def get_route_and_variables_for_path(path):
                         break
 
         if patterns_match:
-            return content_routes[route_identifier], var_names, var_values
+            return content_routes[original_route_identifier], var_names, var_values
 
     raise KeyError(
         "Exception for path="
@@ -68,10 +69,14 @@ def get_route_and_variables_for_path(path):
     )
 
 
-content_types = {}
+class View:
+    def __init__(self, file_path, content_type, view_func) -> None:
+        self.file_path = file_path
+        self.content_type = content_type
+        self.view_func = view_func
 
 
-def route(identifier, path=None):
+def route_identifier_with_or_without_file_path(identifier, path=None):
     if not path:
         path = identifier
 
@@ -84,111 +89,46 @@ def route(identifier, path=None):
             file_path = CONTENT_DIRECTORY_NAME + "/index.html"
 
         content_routes[identifier] = view_class(file_path)
-        content_types[identifier] = ViewHelper.get_content_type_for_extension(
-            ViewHelper.get_file_extension(file_path)
-        )
         return view_class
 
     return wrapper
 
 
+def route(identifier):
+    def wrapper(view_func):
+        content_routes[identifier] = View(None, "text/html", view_func)
+        return view_func
+
+    return wrapper
+
+
 def render(path):
-    return content_routes[path].build_GET_response()
+    """
+    path can either be a full path, in which case just call view_func()
+    or an identifier.
 
+    TODO handle content routes with variables
+    """
 
-class BaseView:
-    def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
-        self.file_path = file_path
-        self.status_code = status_code
-        self.headers = {
-            "Content-type": content_type,
-        }
-
-    def build_GET_response(self) -> str:
-        return "Not implemented"
-
-    def build_POST_response(self) -> str:
-        return "Not implemented"
-
-    def __str__(self) -> str:
-        return (
-            "File path: "
-            + self.file_path
-            + "; status="
-            + str(self.status_code)
-            + "; headers="
-            + str(self.headers)
+    relative_path = CONTENT_DIRECTORY_NAME + "/" + path
+    if os.path.isfile(relative_path):
+        content_type = ViewHelper.get_content_type_for_extension(
+            ViewHelper.get_file_extension(relative_path)
         )
-
-
-class HTMLFileView(BaseView):
-    def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
-        super().__init__(file_path, status_code, content_type)
-
-    def build_GET_response(self) -> str:
-        with open(self.file_path) as f:
-            return f.read()
-
-
-class CSSFileView(BaseView):
-    def __init__(self, file_path, status_code=404, content_type="text/css") -> None:
-        super().__init__(file_path, status_code, content_type)
-
-    def build_GET_response(self) -> str:
-        with open(self.file_path) as f:
-            return f.read()
-
-
-class JavaScriptFileView(BaseView):
-    def __init__(
-        self, file_path="", status_code=404, content_type="text/javascript"
-    ) -> None:
-        super().__init__(file_path, status_code, content_type)
-
-    def build_GET_response(self) -> str:
-        with open(self.file_path) as f:
-            return f.read()
-
-
-class PHPFileView(BaseView):
-    def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
-        super().__init__(file_path, status_code, content_type)
-
-    def build_GET_response(self) -> str:
-        with open(self.file_path) as f:
-            return f.read()
-
-
-class ImageFileView(BaseView):
-    def __init__(self, file_path, status_code=404, content_type="image/jpeg") -> None:
-        super().__init__(file_path, status_code, content_type)
-
-    def build_GET_response(self) -> str:
-        with open(self.file_path, "rb") as f:
-            return f.read()
-
-
-class MiscFileView(BaseView):
-    def __init__(self, file_path="", status_code=404, content_type="text/html") -> None:
-        super().__init__(file_path, status_code, content_type)
-
-    def build_GET_response(self) -> str:
-        with open(self.file_path) as f:
-            return f.read()
+        if ViewHelper.is_image_content_type(content_type):
+            with open(relative_path, "rb") as f:
+                return f.read()
+        else:
+            with open(relative_path) as f:
+                return f.read()
+    else:
+        return content_routes[path].view_func()
 
 
 def index_files_in_content(full_path_to_content_dir=""):
-    extension_view_class = {
-        "html": HTMLFileView,
-        "css": CSSFileView,
-        "js": JavaScriptFileView,
-        "php": PHPFileView,
-        "gif": ImageFileView,
-        "jpg": ImageFileView,
-        "png": ImageFileView,
-        "tiff": ImageFileView,
-        "svg": ImageFileView,
-    }
+    # https://www.geeksforgeeks.org/why-do-python-lambda-defined-in-a-loop-with-different-values-all-return-the-same-result/
+    def create_lambda(func, *args):
+        return lambda: func(*args)
 
     if full_path_to_content_dir and full_path_to_content_dir[-1] != "/":
         full_path_to_content_dir += "/"
@@ -200,23 +140,16 @@ def index_files_in_content(full_path_to_content_dir=""):
         file_path = file_path.lower()
         file_path = file_path.replace("\\", "/")
 
-        request_path = file_path[
+        file_name = file_path[
             file_path.find(CONTENT_DIRECTORY_NAME) + len(CONTENT_DIRECTORY_NAME) :
-        ]
-        if os.path.isfile(file_path) and request_path not in content_routes:
+        ][1:]
+        if os.path.isfile(file_path):
             file_extension = ViewHelper.get_file_extension(file_path)
-            content_type = ViewHelper.get_content_type_for_extension(file_extension)
-
-            if file_extension not in extension_view_class:
-                print(
-                    "Warning, unsupported file "
-                    + file_path
-                    + '. Interpreting as misc file (content_type="text/html").'
-                )
-                content_routes[request_path] = MiscFileView(
-                    file_path, status_code=200, content_type="text/html"
-                )
-            else:
-                content_routes[request_path] = extension_view_class[file_extension](
-                    file_path, status_code=200, content_type=content_type
+            if (
+                file_extension not in ("htm", "html", "php")
+                and file_name not in content_routes
+            ):
+                content_type = ViewHelper.get_content_type_for_extension(file_extension)
+                content_routes[file_name] = View(
+                    file_path, content_type, create_lambda(render, file_name)
                 )
