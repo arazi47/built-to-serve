@@ -39,10 +39,11 @@ class Server(BaseHTTPRequestHandler):
                 path_var_values,
             ) = get_route_and_variables_for_path(self.path[1:])
         except KeyError as e:
-            self.send_response(404)
-            self.end_headers()
+            self.send_status_and_headers("text/html", 404)
+            self.write_response("Page not found", "text/html")
 
-            raise e
+            print(e)
+            return
 
         view_func_var_names = [
             var_name
@@ -71,10 +72,11 @@ class Server(BaseHTTPRequestHandler):
                 self.path[1:]
             )
         except KeyError as e:
-            self.send_response(404)
-            self.end_headers()
+            self.send_status_and_headers("text/html", 404)
+            self.write_response("Page not found", "text/html")
 
-            raise e
+            print(e)
+            return
 
         response = view_class.view_func(*path_var_values)
         self.send_status_and_headers(view_class.content_type)

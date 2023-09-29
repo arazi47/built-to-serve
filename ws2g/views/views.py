@@ -37,16 +37,22 @@ def get_route_and_variables_for_path(path):
     # content_routes entry: /thing/<var1>/asd/<var2>/etc
     # path: /thing/hithere/asd/12/etc
 
+    original_path = path
     path = path.split("/")
     for route_identifier in content_routes.keys():
         patterns_match = True
         original_route_identifier = route_identifier
         route_identifier = route_identifier.split("/")
+        identifier_contains_vars = False
 
         # If they split the same
         if len(path) == len(route_identifier):
             for path_elem, identifier_elem in zip(path, route_identifier):
+                identifier_contains_vars = False
                 if has_variable_form(identifier_elem):
+                    if not identifier_contains_vars:
+                        identifier_contains_vars = True
+
                     # Check that path_elem contains only numbers, alphas and _
                     if not re.fullmatch(r"[\w\d_]+", path_elem):
                         patterns_match = False
@@ -59,12 +65,12 @@ def get_route_and_variables_for_path(path):
                         patterns_match = False
                         break
 
-        if patterns_match:
+        if identifier_contains_vars and patterns_match:
             return content_routes[original_route_identifier], var_names, var_values
 
     raise KeyError(
         "Exception for path="
-        + path
+        + original_path
         + ". The path is either not routed correctly or not created at all."
     )
 
@@ -96,7 +102,7 @@ def route_identifier_with_or_without_file_path(identifier, path=None):
 
 def route(identifier):
     def wrapper(view_func):
-        content_routes[identifier] = View(None, "text/html", view_func)
+        content_routes[identifier[1:]] = View(None, "text/html", view_func)
         return view_func
 
     return wrapper
