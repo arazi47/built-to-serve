@@ -2,6 +2,7 @@ import os
 import glob
 import re
 
+from ws2g.custom_content_parser.custom_content_parser import transform_template_to_code
 from ws2g.views.view_helper import ViewHelper
 
 CONTENT_DIRECTORY_NAME = "content"
@@ -82,24 +83,6 @@ class View:
         self.view_func = view_func
 
 
-def route_identifier_with_or_without_file_path(identifier, path=None):
-    if not path:
-        path = identifier
-
-    def wrapper(view_class):
-        # Route path to an instance of the class
-        # [1:] - without leading '/'
-        file_path = path[1:]
-        file_path = CONTENT_DIRECTORY_NAME + "/" + file_path
-        if file_path == CONTENT_DIRECTORY_NAME + "/":
-            file_path = CONTENT_DIRECTORY_NAME + "/index.html"
-
-        content_routes[identifier] = view_class(file_path)
-        return view_class
-
-    return wrapper
-
-
 def route(identifier):
     def wrapper(view_func):
         content_routes[identifier[1:]] = View(None, "text/html", view_func)
@@ -108,7 +91,7 @@ def route(identifier):
     return wrapper
 
 
-def render(path):
+def render(path, template_data=dict()):
     """
     path can either be a full path, in which case just call view_func()
     or an identifier.
@@ -125,8 +108,7 @@ def render(path):
             with open(relative_path, "rb") as f:
                 return f.read()
         else:
-            with open(relative_path) as f:
-                return f.read()
+            return transform_template_to_code(relative_path, template_data)
     else:
         return content_routes[path].view_func()
 
