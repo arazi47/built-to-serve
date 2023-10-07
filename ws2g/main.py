@@ -31,13 +31,18 @@ class Server(BaseHTTPRequestHandler):
         else:
             self.wfile.write(bytes(response, "utf-8"))
 
+    def redirect(self, path):
+        self.send_response(301)
+        self.send_header("Location", path)
+        self.end_headers()
+
     def do_POST(self):
         try:
             (
                 view_class,
                 path_var_names,
                 path_var_values,
-            ) = get_route_and_variables_for_path(self.path[1:])
+            ) = get_route_and_variables_for_path(self.path[1:], "POST")
         except KeyError as e:
             self.send_status_and_headers("text/html", 404)
             self.write_response("Page not found", "text/html")
@@ -47,14 +52,16 @@ class Server(BaseHTTPRequestHandler):
 
         view_func_var_names = [
             var_name
-            for var_name in view_class.view_func.__code__.co_varnames
+            for var_name in view_class.view_func.__code__.co_varnames[
+                : view_class.view_func.__code__.co_argcount
+            ]
             if var_name not in path_var_names
         ]
         length = int(self.headers.get("content-length"))
         field_data = self.rfile.read(length)
         fields = parse.parse_qs(str(field_data, "UTF-8"), keep_blank_values=True)
         rest_of_view_func_var_values = [
-            fields[var_name] for var_name in view_func_var_names
+            fields[var_name][0] for var_name in view_func_var_names
         ]
 
         # The path may be admin/users/1234/edit
@@ -63,13 +70,16 @@ class Server(BaseHTTPRequestHandler):
         # e.g. the new user spassword or whatever the admin edited
         response = view_class.view_func(*path_var_values, *rest_of_view_func_var_values)
 
-        self.send_status_and_headers(view_class.content_type)
-        self.write_response(response, view_class.content_type)
+        if response.content_type == "redirect":
+            self.redirect(response.file_path)
+        else:
+            self.send_status_and_headers(view_class.content_type)
+            self.write_response(response, view_class.content_type)
 
     def do_GET(self):
         try:
             view_class, _, path_var_values = get_route_and_variables_for_path(
-                self.path[1:]
+                self.path[1:], "GET"
             )
         except KeyError as e:
             self.send_status_and_headers("text/html", 404)

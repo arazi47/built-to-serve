@@ -26,21 +26,26 @@ def has_variable_form(string):
     return string.isidentifier()
 
 
-def get_route_and_variables_for_path(path):
-    """Return the correct function to exeecute for given path
+def get_route_and_variables_for_path(path, method):
+    """Return the correct function to execute for given path
     along with the extracted variables."""
     var_names = []
     var_values = []
 
     if path in content_routes:
-        return content_routes[path], var_names, var_values
+        method_view_dict = content_routes[path]
+        if method in method_view_dict:
+            return method_view_dict[method], var_names, var_values
 
-    # content_routes entry: /thing/<var1>/asd/<var2>/etc
-    # path: /thing/hithere/asd/12/etc
+    # content_routes entry: "/thing/<var1>/asd/<var2>/etc"
+    # path: "/thing/hithere/asd/12/etc"
 
     original_path = path
     path = path.split("/")
     for route_identifier in content_routes.keys():
+        if method not in content_routes[route_identifier]:
+            continue
+
         patterns_match = True
         original_route_identifier = route_identifier
         route_identifier = route_identifier.split("/")
@@ -67,7 +72,11 @@ def get_route_and_variables_for_path(path):
                         break
 
         if identifier_contains_vars and patterns_match:
-            return content_routes[original_route_identifier], var_names, var_values
+            return (
+                content_routes[original_route_identifier][method],
+                var_names,
+                var_values,
+            )
 
     raise KeyError(
         "Exception for path="
@@ -77,15 +86,21 @@ def get_route_and_variables_for_path(path):
 
 
 class View:
-    def __init__(self, file_path, content_type, view_func) -> None:
+    def __init__(self, file_path, content_type, view_func, method) -> None:
         self.file_path = file_path
         self.content_type = content_type
         self.view_func = view_func
+        self.method = method
 
 
-def route(identifier):
+def route(identifier, method):
     def wrapper(view_func):
-        content_routes[identifier[1:]] = View(None, "text/html", view_func)
+        # Get rid of leading '/'
+        id = identifier[1:]
+        if id in content_routes:
+            content_routes[id][method] = View(None, "text/html", view_func, method)
+        else:
+            content_routes[id] = {method: View(None, "text/html", view_func, method)}
         return view_func
 
     return wrapper
@@ -109,8 +124,17 @@ def render(path, template_data=dict()):
                 return f.read()
         else:
             return transform_template_to_code(relative_path, template_data)
-    else:
-        return content_routes[path].view_func()
+    elif path[1:] in content_routes:
+        method_view_dict = content_routes[path[1:]]
+        # Can't render a POST
+        if "GET" in method_view_dict:
+            return method_view_dict["GET"].view_func()
+
+    raise KeyError('Page "' + path + '" not found!')
+
+
+def redirect(path):
+    return View(path, "redirect", None, None)
 
 
 def index_files_in_content(full_path_to_content_dir=""):
@@ -138,6 +162,8 @@ def index_files_in_content(full_path_to_content_dir=""):
                 and file_name not in content_routes
             ):
                 content_type = ViewHelper.get_content_type_for_extension(file_extension)
-                content_routes[file_name] = View(
-                    file_path, content_type, create_lambda(render, file_name)
-                )
+                content_routes[file_name] = {
+                    "GET": View(
+                        file_path, content_type, create_lambda(render, file_name), "GET"
+                    )
+                }
