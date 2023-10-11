@@ -1,7 +1,7 @@
 import os
 
 
-class ViewHelper:
+class ViewService:
     @staticmethod
     def is_image_content_type(content_type):
         return content_type.startswith("image/")
@@ -25,7 +25,7 @@ class ViewHelper:
             return "text/css"
         elif file_extension == "js":
             return "text/javascript"
-        elif ViewHelper.is_image_extension(file_extension):
+        elif ViewService.is_image_extension(file_extension):
             if file_extension == "jpg":
                 return "image/jpeg"
             return "image/" + file_extension

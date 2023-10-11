@@ -6,7 +6,7 @@ from .views.views import (
     get_route_and_variables_for_path,
     index_files_in_content_dir,
 )
-from .views.view_helper import ViewHelper
+from .services.view_service import ViewService
 
 
 class Server(BaseHTTPRequestHandler):
@@ -29,7 +29,7 @@ class Server(BaseHTTPRequestHandler):
         self.end_headers()
 
     def write_response(self, response, content_type):
-        if ViewHelper.is_image_content_type(content_type):
+        if ViewService.is_image_content_type(content_type):
             self.wfile.write(bytes(response))
         else:
             self.wfile.write(bytes(response, "utf-8"))

@@ -3,7 +3,7 @@ import glob
 import re
 
 from ws2g.custom_content_parser.custom_content_parser import transform_template_to_code
-from ws2g.views.view_helper import ViewHelper
+from ws2g.services.view_service import ViewService
 
 CONTENT_DIRECTORY_NAME = "content"
 
@@ -146,10 +146,10 @@ def render(path, template_data=dict()):
 
     relative_path = CONTENT_DIRECTORY_NAME + "/" + path
     if os.path.isfile(relative_path):
-        content_type = ViewHelper.get_content_type_for_extension(
-            ViewHelper.get_file_extension(relative_path)
+        content_type = ViewService.get_content_type_for_extension(
+            ViewService.get_file_extension(relative_path)
         )
-        if ViewHelper.is_image_content_type(content_type):
+        if ViewService.is_image_content_type(content_type):
             with open(relative_path, "rb") as f:
                 return f.read()
         else:
@@ -196,12 +196,12 @@ def index_files_in_content_dir(full_path_to_content_dir=""):
             file_path.find(CONTENT_DIRECTORY_NAME) + len(CONTENT_DIRECTORY_NAME) :
         ][1:]
         if os.path.isfile(file_path):
-            file_extension = ViewHelper.get_file_extension(file_path)
+            file_extension = ViewService.get_file_extension(file_path)
             if (
                 file_extension not in ("htm", "html", "php")
                 and file_name not in content_routes
             ):
-                content_type = ViewHelper.get_content_type_for_extension(file_extension)
+                content_type = ViewService.get_content_type_for_extension(file_extension)
                 content_routes[file_name] = {
                     "GET": View(
                         file_path, content_type, create_lambda(render, file_name), "GET"
