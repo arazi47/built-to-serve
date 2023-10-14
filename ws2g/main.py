@@ -182,7 +182,7 @@ class Server(BaseHTTPRequestHandler):
 def run():
     if len(sys.argv) < 3:
         print(
-            '[WARNING] Missing one or more arguments. Using default values server_address="0.0.0.0", server_port=8000'  # noqa: E501
+            '[WARNING] Missing one or more arguments. Using default values server_address="0.0.0.0", server_port=8000. Press CTRL+C to shut down the server.'  # noqa: E501
         )
         server_address = "0.0.0.0"
         server_port = 8000
