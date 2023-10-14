@@ -201,7 +201,9 @@ def index_files_in_content_dir(full_path_to_content_dir=""):
                 file_extension not in ("htm", "html", "php")
                 and file_name not in content_routes
             ):
-                content_type = ViewService.get_content_type_for_extension(file_extension)
+                content_type = ViewService.get_content_type_for_extension(
+                    file_extension
+                )
                 content_routes[file_name] = {
                     "GET": View(
                         file_path, content_type, create_lambda(render, file_name), "GET"
