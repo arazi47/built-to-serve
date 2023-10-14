@@ -101,7 +101,7 @@ def post_guest_home():
     return redirect("/")
 ```
 
-`redirect("/identifier)` can be called to force the client to generate a new GET request for an identifier. The above example will generate a GET request for `/`, which will in turn call the `index()` function mentioned in the previous example.
+`redirect("/identifier")` can be called to force the client to generate a new GET request for an identifier. The above example will generate a GET request for `/`, which will in turn call the `index()` function mentioned in the previous example.
 
 ### Path variables
 
@@ -115,6 +115,12 @@ Notice the above example. A GET request on `/users/123` would display `viewing u
 
 > [!NOTE]
 > In Python, all path variables are passed as strings. The user can convert them to other data types as needed.
+
+> [!IMPORTANT]
+> Valid variable names are the same as in other programming languages. (they can only contain letters, numbers and the underscore character, must not start with a letter and cannot contain any spaces.)
+
+> [!IMPORTANT]
+> Variable values can can only contain letters, numbers and the underscore character.
 
 ### Passing inputs from HTML files
 
@@ -162,3 +168,6 @@ A typical use case for `__extra_variables` is to query which button was pressed 
 
 > [!NOTE]
 > In Python, input variables and the values of the keys in `__extra_fields` are passed as strings. The user can convert them to other data types as needed.
+
+> [!IMPORTANT]
+> Valid input names are the same as valid variable names in programming. (they can only contain letters, numbers and the underscore character, must not start with a letter and cannot contain any spaces.)
