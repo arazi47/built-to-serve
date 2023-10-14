@@ -35,20 +35,20 @@ This library supports all displaying images, videos, HTML/CSS and JavaScript fil
 
 ### Code templates
 ```html
-<table id="gbentries-table" border = "1">
+<table border = "1">
 <tr>
   <th>ID</th>
-  <th>Username</th>
+  <th>Name</th>
   <th>Comment</th>
   <th>Posted on</th>
 </tr>
 {{customcontent}}
-  {{for gbentry in gbrepo}}
+  {{for guestbook_entry in guestbook_repo}}
     <tr>
-    <td>{{gbentry.id}}</td>
-    <td>{{gbentry.username}}</td>
-    <td>{{gbentry.comment}}</td>
-    <td>{{gbentry.posted_on}}</td>
+    <td>{{guestbook_entry.id}}</td>
+    <td>{{guestbook_entry.name}}</td>
+    <td>{{guestbook_entry.comment}}</td>
+    <td>{{guestbook_entry.posted_on}}</td>
     </tr>
   {{endfor}}
 {{endcustomcontent}}
@@ -57,11 +57,37 @@ This library supports all displaying images, videos, HTML/CSS and JavaScript fil
 
 Notice the `{{customcontent}}` and `{{endcustomcontent}}` tags. They represent the beginning and the end of the area of code that contains custom content. Inside, there is a loop which iterates over a list of objects and displays some of its attributes on diffeernt table rows.
 
-The resulting HTML content is this:
-* TODO add code
+In the above example, the template parser will duplicate every line that is inside the loop.
 
-And the result on the user's screen is this:
-* TODO add pic
+Here is a snippet from the resulting HTML content:
+```HTML
+	<table id="gbentries-table" border = "1">
+	<tr>
+	<th>ID</th>
+	<th>Name</th>
+	<th>Comment</th>
+	<th>Posted on</th>
+	</tr>
+			<tr>
+			<td>1</td>
+			<td>The_Rock</td>
+			<td>Great stuff</td>
+			<td>January 1, 2023 03:32PM</td>
+			</tr>
+			<tr>
+			<td>2</td>
+			<td>Me</td>
+			<td>Leaving a comment...</td>
+			<td>February 26, 2023 09:46PM</td>
+			</tr>
+			<tr>
+			<td>3</td>
+			<td>DefinitelyNotAScammer</td>
+			<td>We've been trying to reach you about your car's extended warranty</td>
+      <td>October 07, 2023 03:17PM</td>
+			</tr>
+	</table>
+```
 
 ### No boilerplate for repositories!
 ```python
