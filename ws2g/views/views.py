@@ -129,10 +129,15 @@ def route(identifier, method):
     def wrapper(view_func):
         # Get rid of leading '/'
         id = identifier[1:]
-        content_routes[id] = content_routes.get(
-            id, {method: View(None, "text/html", view_func, method)}
-        )
+        if id in content_routes:
+          content_routes[id][method] = View(None, "text/html", view_func, method)
+        else:
+          content_routes[id] = {method: View(None, "text/html", view_func, method)
         return view_func
+
+        # content_routes[id] = content_routes.get(
+        #     id, {method: View(None, "text/html", view_func, method)}
+        # )
 
     return wrapper
 
