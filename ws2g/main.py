@@ -34,18 +34,6 @@ class Server(BaseHTTPRequestHandler):
         else:
             self.wfile.write(bytes(response, "utf-8"))
 
-    def _write_response(self, view_class, response_body, empty_response=False):
-        # self.send_status_and_headers(view_class.content_type)
-        # if not empty_response:
-        #     self.write_response(response_body, view_class.content_type)
-
-        # if response_body.content_type == "redirect":
-        #     self.redirect(response_body.file_path)
-        view_class
-        response_body
-        empty_response
-        # TODO
-
     def redirect(self, path):
         self.send_status_and_headers(
             status_code=301, additional_headers={"Location": path}
