@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build_and_validate:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -29,25 +29,15 @@ jobs:
       run: |
         poetry build
         pip install dist/$(ls dist | grep .*.whl)
+    - name: Run ruff
+      run: poetry run ruff check . -v
+    - name: Run black (dry run)
+      run: poetry run black --check . -v
+    - name: Run unit tests
+      run: pytest
   
-  run_linters:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Run ruff
-        run: poetry run ruff check . -v
-      - name: Run black (dry run)
-        run: poetry run black --check . -v
-  
-  run_unit_tests:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run unit tests
-        run: pytest
-    
   push_to_docker_repo:
-    needs: [run_linters, run_unit_tests]
+    needs: build_and_validate
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
