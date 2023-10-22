@@ -35,16 +35,11 @@ jobs:
       run: poetry run black --check . -v
     - name: Run unit tests
       run: pytest
-  
-  push_to_docker_repo:
-    needs: build_and_validate
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Build & push Docker image
-        uses: mr-smithers-excellent/docker-build-push@v6  
-        with:
-          image: arazi99/ws2g
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build & push Docker image
+      if: github.ref == 'refs/heads/main'
+      uses: mr-smithers-excellent/docker-build-push@v6  
+      with:
+        image: arazi99/ws2g
+        registry: docker.io
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
