@@ -35,7 +35,6 @@ jobs:
       run: poetry run black --check . -v
     - name: Run unit tests
       run: pytest
-
     - name: Build & push Docker image
       if: github.ref == 'refs/heads/main'
       uses: mr-smithers-excellent/docker-build-push@v6  
