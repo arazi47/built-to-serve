@@ -31,6 +31,7 @@ jobs:
         pip install dist/$(ls dist | grep .*.whl)
   
   run_linters:
+    needs: build
     steps:
       - name: Run ruff
         run: poetry run ruff check . -v
@@ -38,15 +39,14 @@ jobs:
         run: poetry run black --check . -v
   
   run_unit_tests:
+    needs: build
     steps:
       - name: Run unit tests
         run: pytest
     
   push_to_docker_repo:
-    on:
-      push:
-        branches:
-          - 'main'
+    needs: [run_linters, run_unit_tests]
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: mr-smithers-excellent/docker-build-push@v6
         name: Build & push Docker image
