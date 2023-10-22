@@ -13,10 +13,8 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
+  build_and_validate:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.11
@@ -27,20 +25,26 @@ jobs:
       run: |
         pip install poetry
         poetry install
-    - name: Run ruff
-      run: poetry run ruff check . -v
-    - name: Run black (dry run)
-      run: poetry run black --check . -v
     - name: Build and install package
       run: |
         poetry build
         pip install dist/$(ls dist | grep .*.whl)
+    - name: Run ruff
+      run: poetry run ruff check . -v
+    - name: Run black (dry run)
+      run: poetry run black --check . -v
     - name: Run unit tests
       run: pytest
-    - uses: mr-smithers-excellent/docker-build-push@v6
-      name: Build & push Docker image
-      with:
-        image: arazi99/ws2g
-        registry: docker.io
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+  
+  push_to_docker_repo:
+    needs: build_and_validate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6  
+        with:
+          image: arazi99/ws2g
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
