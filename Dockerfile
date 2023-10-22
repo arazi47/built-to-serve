@@ -14,4 +14,5 @@ RUN git clone https://github.com/arazi47/built-to-serve-testing-app.git testing-
 WORKDIR /testing-app
 
 EXPOSE 8000
-CMD ["python", "main.py"]
+# CMD ["python", "main.py"]
+CMD ["sleep", "infinity"]
